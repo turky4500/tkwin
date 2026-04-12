@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرسل واتساب المتقدم - تنسيق 966</title>
+    <title>مرسل واتساب | تنسيق 966</title>
     <!-- Font Awesome للأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -15,7 +15,7 @@
         }
 
         body {
-            background: linear-gradient(145deg, #0e1c2f 0%, #1a3a4f 100%);
+            background: linear-gradient(145deg, #0b2b40 0%, #1e4e62 100%);
             min-height: 100vh;
             padding: 25px 15px;
             display: flex;
@@ -29,15 +29,15 @@
             margin: 0 auto;
         }
 
-        /* بطاقة رئيسية زجاجية */
+        /* بطاقة زجاجية مشرقة */
         .glass-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 40px;
             padding: 30px 25px;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 230, 250, 0.2) inset;
             transition: all 0.3s ease;
         }
 
@@ -48,7 +48,7 @@
             font-weight: 700;
             font-size: 2.8rem;
             letter-spacing: 2px;
-            text-shadow: 0 5px 15px #00c8ff80;
+            text-shadow: 0 5px 20px #00e5ff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -58,14 +58,14 @@
 
         h1 i {
             color: #25d366;
-            filter: drop-shadow(0 0 8px #25d366);
+            filter: drop-shadow(0 0 12px #25d366);
         }
 
         h2 {
-            color: #e0f2fe;
+            color: #e6f7ff;
             margin-bottom: 18px;
             font-size: 1.6rem;
-            border-right: 6px solid #2dd4bf;
+            border-right: 6px solid #00e5ff;
             padding-right: 20px;
         }
 
@@ -83,16 +83,16 @@
         }
 
         .input-area {
-            background: rgba(10, 30, 40, 0.6);
+            background: rgba(8, 40, 55, 0.7);
             border-radius: 30px;
             padding: 22px 20px;
-            border: 1px solid #2dd4bf40;
-            box-shadow: 0 10px 20px -5px #00000040;
+            border: 1px solid #2dd4bf60;
+            box-shadow: 0 10px 20px -5px #00000030;
         }
 
         label {
             display: block;
-            color: #b6e6ff;
+            color: #c2f0ff;
             margin-bottom: 12px;
             font-weight: 600;
             font-size: 1.2rem;
@@ -106,8 +106,8 @@
         textarea, input[type="text"], input[type="password"] {
             width: 100%;
             padding: 16px 18px;
-            background: #0b1e28;
-            border: 2px solid #1e4a5f;
+            background: #06202b;
+            border: 2px solid #1e6a7a;
             border-radius: 24px;
             color: #fff;
             font-size: 1rem;
@@ -119,17 +119,17 @@
         textarea:focus, input:focus {
             border-color: #2dd4bf;
             outline: none;
-            box-shadow: 0 0 15px #2dd4bf80, inset 0 2px 5px #000;
+            box-shadow: 0 0 18px #2dd4bf, inset 0 2px 5px #000;
         }
 
         .numbers-box {
-            min-height: 180px;
+            min-height: 160px;
         }
 
         .filter-btn {
-            background: linear-gradient(135deg, #0ea5e9, #2dd4bf);
+            background: linear-gradient(135deg, #00b4d8, #48cae4);
             border: none;
-            color: white;
+            color: #022c3a;
             padding: 14px 24px;
             font-size: 1.3rem;
             font-weight: bold;
@@ -137,22 +137,23 @@
             margin: 18px 0 10px;
             cursor: pointer;
             width: 100%;
-            box-shadow: 0 8px 18px #00a6ff40;
+            box-shadow: 0 8px 18px #00b4d880;
             transition: all 0.2s;
-            border: 1px solid #7dd3fc;
+            border: 1px solid #b5f0ff;
         }
 
         .filter-btn:hover {
             transform: scale(1.02);
             box-shadow: 0 10px 25px #2dd4bf;
-            background: linear-gradient(135deg, #0284c7, #14b8a6);
+            background: linear-gradient(135deg, #0096c7, #00b4d8);
+            color: white;
         }
 
         .formatted-list {
-            background: #0c2532;
+            background: #0a2e3c;
             border-radius: 24px;
             padding: 18px;
-            max-height: 250px;
+            max-height: 240px;
             overflow-y: auto;
             border: 1px solid #2dd4bf;
             margin-top: 15px;
@@ -166,6 +167,16 @@
             font-size: 1.2rem;
         }
 
+        .counter-badge {
+            display: inline-block;
+            background: #2dd4bf;
+            color: #021e26;
+            padding: 5px 15px;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
         .token-box {
             margin-top: 20px;
         }
@@ -177,7 +188,7 @@
 
         .send-btn {
             background: #25d366;
-            color: #000;
+            color: #01181f;
             font-weight: bold;
             font-size: 1.8rem;
             padding: 20px 40px;
@@ -193,7 +204,7 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
-            border: 2px solid #a7f3d0;
+            border: 2px solid #b5f0d0;
         }
 
         .send-btn:disabled {
@@ -204,12 +215,13 @@
         }
 
         .stop-btn {
-            background: #ef4444;
-            color: white;
-            box-shadow: 0 0 20px #ef4444;
+            background: #ff7b7b;
+            color: #1e0000;
+            box-shadow: 0 0 20px #ff7b7b;
             font-size: 1.4rem;
             padding: 15px 30px;
             margin-right: 15px;
+            border: 2px solid #ffc2c2;
         }
 
         .progress-panel {
@@ -273,12 +285,12 @@
         }
 
         .tag-pending {
-            background: #713f12;
+            background: #b45309;
             border-color: #fde047;
         }
 
         .tag-error {
-            background: #7f1d1d;
+            background: #991b1b;
             border-color: #fca5a5;
         }
 
@@ -294,19 +306,28 @@
         }
 
         .footer-note {
-            color: #94a3b8;
+            color: #b3e4ff;
             text-align: center;
             margin-top: 25px;
         }
 
-        i {
-            pointer-events: none;
-        }
-
         .small-note {
-            color: #9cd4e0;
+            color: #b3e4ff;
             font-size: 0.9rem;
             margin-top: 8px;
+        }
+
+        /* ملخص الأرقام */
+        .summary-box {
+            background: #144a5e;
+            border-radius: 20px;
+            padding: 12px 18px;
+            margin: 15px 0;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #00e5ff;
         }
     </style>
 </head>
@@ -315,8 +336,8 @@
     <div class="glass-card">
         <h1>
             <i class="fab fa-whatsapp"></i>
-            مرسل واتساب الذكي
-            <i class="fas fa-flag-checkered"></i>
+            مرسل واتساب المتطور
+            <i class="fas fa-check-circle"></i>
         </h1>
 
         <!-- تنبيه استئناف الجلسة -->
@@ -334,6 +355,13 @@
                 <label><i class="fas fa-list-ol"></i> الأرقام (الصقها بأي صيغة)</label>
                 <textarea id="rawNumbers" class="numbers-box" placeholder="مثال: 0561234567, 966501234567, 0555123456 ..."></textarea>
                 <button class="filter-btn" id="filterBtn"><i class="fas fa-filter"></i> تصفية وتنسيق (966xxxxxxxxx)</button>
+                
+                <!-- ملخص سريع -->
+                <div id="quickSummary" class="summary-box" style="display: none;">
+                    <span><i class="fas fa-check-circle" style="color:#2dd4bf;"></i> <span id="validCount">0</span> رقم صالح</span>
+                    <span><i class="fas fa-info-circle"></i> سيتم الإرسال لهذه الأرقام</span>
+                </div>
+
                 <div style="margin-top: 10px;">
                     <label><i class="fas fa-check-double"></i> الأرقام المنسّقة (12 خانة)</label>
                     <div id="formattedContainer" class="formatted-list">
@@ -352,7 +380,7 @@
                 
                 <div class="token-box">
                     <label><i class="fas fa-key"></i> رمز المصادقة (Bearer Token)</label>
-                    <input type="password" id="apiToken" placeholder="مثال: 7a203d6ba6f4325ed3261ea87f6b2e751250ad97" value="">
+                    <input type="password" id="apiToken" placeholder="أدخل الرمز السري الخاص بك" value="" autocomplete="off">
                 </div>
                 <div class="small-note" style="margin-top: 20px;">
                     <i class="fas fa-shield-alt"></i> الرمز مطلوب للمصادقة على الإرسال.
@@ -407,6 +435,8 @@
         const resumeBanner = document.getElementById('resumeBanner');
         const resumeYesBtn = document.getElementById('resumeYesBtn');
         const resumeNoBtn = document.getElementById('resumeNoBtn');
+        const quickSummary = document.getElementById('quickSummary');
+        const validCountSpan = document.getElementById('validCount');
 
         // حالة التطبيق
         let formattedNumbers = [];            // الأرقام بعد التنسيق (نظيفة)
@@ -424,50 +454,41 @@
 
         // ---------- دوال مساعدة للتنسيق (966 + 9 أرقام) ----------
         function formatSingleNumber(raw) {
-            // إزالة كل شيء غير الأرقام
             let digits = raw.replace(/\D/g, '');
             if (digits.length === 0) return null;
 
-            // إذا بدأ بـ 0 (محلي) نحذف الأصفار البادئة ثم نضيف 966
             if (digits.startsWith('0')) {
-                digits = digits.replace(/^0+/, ''); // حذف كل الأصفار من البداية
+                digits = digits.replace(/^0+/, '');
                 if (digits.length === 0) return null;
                 digits = '966' + digits;
             } 
             else if (digits.startsWith('966')) {
-                // لدينا 966 في البداية، نتأكد من إزالة الصفر مباشرة بعد 966 إن وجد
-                let afterPrefix = digits.substring(3); // ما بعد 966
+                let afterPrefix = digits.substring(3);
                 if (afterPrefix.startsWith('0')) {
                     afterPrefix = afterPrefix.replace(/^0+/, '');
                 }
                 digits = '966' + afterPrefix;
             } else {
-                // أي حالة أخرى نضيف 966
                 digits = '966' + digits;
             }
 
-            // الآن نتأكد أن الطول 12 (966 + 9 أرقام)
             if (digits.length > 12) {
                 digits = digits.substring(0, 12);
-            } else if (digits.length < 12) {
-                // إذا كان أقل من 12 نتركه كما هو (قد يكون ناقص) لكن المستخدم سيرى
-                // يمكن إضافة تحذير لكن نكتفي
             }
             return digits;
         }
 
         function processNumbers(inputText) {
-            const lines = inputText.split(/\n|,|;|\s+/); // فصل بأي فاصل شائع
+            const lines = inputText.split(/\n|,|;|\s+/);
             const formatted = [];
             for (let line of lines) {
                 line = line.trim();
                 if (line === '') continue;
                 const formattedNum = formatSingleNumber(line);
-                if (formattedNum && formattedNum.length >= 11) { // على الأقل 11 رقم (966xxxxxxxx)
+                if (formattedNum && formattedNum.length >= 11) {
                     formatted.push(formattedNum);
                 }
             }
-            // إزالة التكرارات
             return [...new Set(formatted)];
         }
 
@@ -475,6 +496,7 @@
             formattedContainer.innerHTML = '';
             if (numbers.length === 0) {
                 formattedContainer.innerHTML = '<div style="color: #f87171;">لا توجد أرقام صالحة</div>';
+                quickSummary.style.display = 'none';
                 return;
             }
             numbers.forEach(num => {
@@ -482,6 +504,8 @@
                 div.textContent = num;
                 formattedContainer.appendChild(div);
             });
+            validCountSpan.textContent = numbers.length;
+            quickSummary.style.display = 'flex';
         }
 
         // ---------- تخزين / استعادة الجلسة ----------
@@ -516,7 +540,6 @@
             localStorage.removeItem(STORAGE_KEY);
         }
 
-        // عرض بانر الاستئناف عند وجود جلسة غير مكتملة
         function checkForResume() {
             const session = loadSession();
             if (session && session.sendingActive === true && session.formattedNumbers && session.formattedNumbers.length > 0) {
@@ -526,7 +549,6 @@
             }
         }
 
-        // استئناف الإرسال
         function resumeSending() {
             const session = loadSession();
             if (!session) return false;
@@ -545,7 +567,6 @@
             renderStatusList();
             updateProgress();
 
-            // استمرار الإرسال من النقطة الحالية
             if (currentIndex < totalNumbers) {
                 scheduleNextSend();
             } else {
@@ -583,7 +604,6 @@
             progressBar.style.width = percent + '%';
         }
 
-        // إنهاء الإرسال
         function finishSending() {
             sendingActive = false;
             sendBtn.style.display = 'inline-flex';
@@ -592,7 +612,6 @@
             clearSession();
         }
 
-        // إرسال رسالة واحدة
         async function sendMessage(number) {
             const token = apiTokenInput.value.trim();
             if (!token) throw new Error('الرجاء إدخال رمز المصادقة');
@@ -618,7 +637,6 @@
             return await response.json();
         }
 
-        // جدولة الإرسال التالي
         function scheduleNextSend() {
             if (!sendingActive) return;
             if (timeoutId) clearTimeout(timeoutId);
@@ -631,14 +649,12 @@
             const currentNumber = formattedNumbers[currentIndex];
             currentActionSpan.textContent = `⏱️ جاري التحضير لإرسال ${currentNumber} ...`;
 
-            // تنفيذ الإرسال الفعلي
             const performSend = async () => {
                 if (!sendingActive) return;
                 try {
                     currentActionSpan.textContent = `📤 جاري إرسال ${currentNumber} ...`;
                     await sendMessage(currentNumber);
                     
-                    // نجاح
                     sendStatuses[currentIndex] = 'sent';
                 } catch (err) {
                     console.error(err);
@@ -650,11 +666,9 @@
                 updateProgress();
                 saveSession();
 
-                // الانتقال للرقم التالي
                 currentIndex++;
                 
                 if (currentIndex < totalNumbers && sendingActive) {
-                    // تأخير عشوائي بين 3 دقائق (180000 مللي) و 13 دقيقة (780000 مللي)
                     const minDelay = 3 * 60 * 1000;
                     const maxDelay = 13 * 60 * 1000;
                     const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
@@ -672,11 +686,10 @@
                 }
             };
 
-            // البدء فوراً بدون تأخير للرقم الحالي
             performSend();
         }
 
-        // بدء عملية إرسال جديدة
+        // بدء عملية إرسال جديدة مع تأكيد
         function startSending() {
             if (formattedNumbers.length === 0) {
                 alert('الرجاء تصفية الأرقام أولاً.');
@@ -687,7 +700,12 @@
                 return;
             }
 
-            // إعادة تعيين الحالة
+            // مربع حوار تأكيدي يوضح العدد
+            const confirmMsg = `سيتم إرسال الرسالة إلى ${formattedNumbers.length} رقم.\n\nهل تريد المتابعة؟`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
             sendingActive = true;
             currentIndex = 0;
             totalNumbers = formattedNumbers.length;
@@ -714,7 +732,6 @@
             sendBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'none';
             currentActionSpan.textContent = '⏸️ تم إيقاف الإرسال يدوياً.';
-            // حفظ الحالة لإمكانية الاستئناف
             saveSession();
         }
 
@@ -723,17 +740,12 @@
             const rawText = rawNumbersArea.value;
             formattedNumbers = processNumbers(rawText);
             updateFormattedDisplay(formattedNumbers);
-            // تحديث الجلسة (بدون إرسال)
-            if (formattedNumbers.length) {
-                // لا نغير sendingActive
-            }
         });
 
         sendBtn.addEventListener('click', startSending);
 
         stopBtn.addEventListener('click', stopSending);
 
-        // استئناف الجلسة
         resumeYesBtn.addEventListener('click', () => {
             resumeSending();
         });
@@ -743,7 +755,6 @@
             resumeBanner.style.display = 'none';
         });
 
-        // قبل إغلاق الصفحة - تحذير بسيط
         window.addEventListener('beforeunload', (e) => {
             if (sendingActive) {
                 saveSession();
@@ -752,17 +763,14 @@
             }
         });
 
-        // عند التحميل: التحقق من وجود جلسة
         window.addEventListener('load', () => {
             checkForResume();
-            // إذا كان هناك جلسة غير نشطة لكن sendingActive=false قد نعرضها فقط
         });
 
-        // تحديث الجلسة عند تغيير الحقول المهمة
         messageText.addEventListener('input', () => { if (sendingActive) saveSession(); });
         apiTokenInput.addEventListener('input', () => { if (sendingActive) saveSession(); });
 
-        // إضافة لمسة: إذا كان هناك أرقام منسقة مسبقاً في الجلسة نعرضها
+        // استعادة بيانات الجلسة إذا كانت محفوظة (بدون تفعيل الإرسال التلقائي)
         const savedSession = loadSession();
         if (savedSession && savedSession.formattedNumbers) {
             formattedNumbers = savedSession.formattedNumbers;
@@ -771,11 +779,8 @@
             if (savedSession.token) apiTokenInput.value = savedSession.token;
         }
 
-        // للراحة: مثال أولي في حقل الأرقام
-        rawNumbersArea.value = '0561234567\n966501234567\n0555123456\n00966501234567\n+966 50 123 4567';
+        // ملاحظة: تم إزالة النص التجريبي من حقل الأرقام وحقل التوكن فارغ تماماً
     })();
 </script>
 </body>
 </html>
-
-
