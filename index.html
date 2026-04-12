@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مرسل واتساب المتقدم - تنسيق 966</title>
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0e1c2f 0%, #1a3a4f 100%);
+            min-height: 100vh;
+            padding: 25px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* بطاقة رئيسية زجاجية */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 40px;
+            padding: 30px 25px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+            text-shadow: 0 5px 15px #00c8ff80;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        h1 i {
+            color: #25d366;
+            filter: drop-shadow(0 0 8px #25d366);
+        }
+
+        h2 {
+            color: #e0f2fe;
+            margin-bottom: 18px;
+            font-size: 1.6rem;
+            border-right: 6px solid #2dd4bf;
+            padding-right: 20px;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-area {
+            background: rgba(10, 30, 40, 0.6);
+            border-radius: 30px;
+            padding: 22px 20px;
+            border: 1px solid #2dd4bf40;
+            box-shadow: 0 10px 20px -5px #00000040;
+        }
+
+        label {
+            display: block;
+            color: #b6e6ff;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        label i {
+            margin-left: 10px;
+            color: #2dd4bf;
+        }
+
+        textarea, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 16px 18px;
+            background: #0b1e28;
+            border: 2px solid #1e4a5f;
+            border-radius: 24px;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            transition: 0.2s;
+            box-shadow: inset 0 4px 8px #00000030;
+        }
+
+        textarea:focus, input:focus {
+            border-color: #2dd4bf;
+            outline: none;
+            box-shadow: 0 0 15px #2dd4bf80, inset 0 2px 5px #000;
+        }
+
+        .numbers-box {
+            min-height: 180px;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #0ea5e9, #2dd4bf);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            margin: 18px 0 10px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 8px 18px #00a6ff40;
+            transition: all 0.2s;
+            border: 1px solid #7dd3fc;
+        }
+
+        .filter-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px #2dd4bf;
+            background: linear-gradient(135deg, #0284c7, #14b8a6);
+        }
+
+        .formatted-list {
+            background: #0c2532;
+            border-radius: 24px;
+            padding: 18px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #2dd4bf;
+            margin-top: 15px;
+        }
+
+        .formatted-list div {
+            color: #d1fae5;
+            padding: 8px 12px;
+            border-bottom: 1px dashed #2dd4bf60;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+
+        .token-box {
+            margin-top: 20px;
+        }
+
+        .send-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .send-btn {
+            background: #25d366;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.8rem;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 60px;
+            width: 100%;
+            max-width: 450px;
+            margin: 10px auto;
+            box-shadow: 0 0 30px #25d366;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border: 2px solid #a7f3d0;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            box-shadow: none;
+            cursor: not-allowed;
+            background: #1e7b4c;
+        }
+
+        .stop-btn {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 0 20px #ef4444;
+            font-size: 1.4rem;
+            padding: 15px 30px;
+            margin-right: 15px;
+        }
+
+        .progress-panel {
+            background: #0e2a36e0;
+            border-radius: 30px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid #facc15;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            color: #fde68a;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar-container {
+            height: 22px;
+            background: #1e3a4b;
+            border-radius: 40px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2dd4bf, #facc15);
+            border-radius: 40px;
+            transition: width 0.3s;
+        }
+
+        .numbers-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 10px 5px;
+        }
+
+        .number-tag {
+            background: #1e4a5f;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            font-family: monospace;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid;
+        }
+
+        .tag-sent {
+            background: #14532d;
+            border-color: #86efac;
+            color: #dcfce7;
+        }
+
+        .tag-pending {
+            background: #713f12;
+            border-color: #fde047;
+        }
+
+        .tag-error {
+            background: #7f1d1d;
+            border-color: #fca5a5;
+        }
+
+        .resume-banner {
+            background: #b45309;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-note {
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        i {
+            pointer-events: none;
+        }
+
+        .small-note {
+            color: #9cd4e0;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="glass-card">
+        <h1>
+            <i class="fab fa-whatsapp"></i>
+            مرسل واتساب الذكي
+            <i class="fas fa-flag-checkered"></i>
+        </h1>
+
+        <!-- تنبيه استئناف الجلسة -->
+        <div id="resumeBanner" class="resume-banner">
+            <span><i class="fas fa-sync-alt"></i> توجد عملية إرسال غير مكتملة. هل تريد استئنافها؟</span>
+            <div>
+                <button id="resumeYesBtn" style="background: #fbbf24; border: none; padding: 10px 20px; border-radius: 30px; margin-left: 10px; font-weight: bold;">نعم، استأنف</button>
+                <button id="resumeNoBtn" style="background: #475569; border: none; padding: 10px 20px; border-radius: 30px; color: white;">تجاهل</button>
+            </div>
+        </div>
+
+        <div class="grid-2col">
+            <!-- القسم الأيسر: الأرقام والتصفية -->
+            <div class="input-area">
+                <label><i class="fas fa-list-ol"></i> الأرقام (الصقها بأي صيغة)</label>
+                <textarea id="rawNumbers" class="numbers-box" placeholder="مثال: 0561234567, 966501234567, 0555123456 ..."></textarea>
+                <button class="filter-btn" id="filterBtn"><i class="fas fa-filter"></i> تصفية وتنسيق (966xxxxxxxxx)</button>
+                <div style="margin-top: 10px;">
+                    <label><i class="fas fa-check-double"></i> الأرقام المنسّقة (12 خانة)</label>
+                    <div id="formattedContainer" class="formatted-list">
+                        <div style="color: #7f8c8d;">لم تتم التصفية بعد</div>
+                    </div>
+                </div>
+                <div class="small-note">
+                    <i class="fas fa-info-circle"></i> يتم حذف الصفر الإضافي بعد 966 إن وُجد.
+                </div>
+            </div>
+
+            <!-- القسم الأيمن: الرسالة والتوكن -->
+            <div class="input-area">
+                <label><i class="fas fa-comment-dots"></i> نص الرسالة</label>
+                <textarea id="messageText" rows="4" placeholder="أهلاً بك، هذه رسالة تجريبية..."></textarea>
+                
+                <div class="token-box">
+                    <label><i class="fas fa-key"></i> رمز المصادقة (Bearer Token)</label>
+                    <input type="password" id="apiToken" placeholder="مثال: 7a203d6ba6f4325ed3261ea87f6b2e751250ad97" value="">
+                </div>
+                <div class="small-note" style="margin-top: 20px;">
+                    <i class="fas fa-shield-alt"></i> الرمز مطلوب للمصادقة على الإرسال.
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم بالإرسال -->
+        <div class="send-section">
+            <button class="send-btn" id="sendBtn"><i class="fab fa-whatsapp"></i> ابدأ الإرسال</button>
+            <button class="send-btn stop-btn" id="stopBtn" style="display: none;"><i class="fas fa-stop-circle"></i> إيقاف الإرسال</button>
+        </div>
+
+        <!-- لوحة التقدم -->
+        <div class="progress-panel" id="progressPanel" style="display: none;">
+            <div class="status-header">
+                <span><i class="fas fa-tasks"></i> حالة الإرسال</span>
+                <span id="progressStats">0 / 0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width:0%"></div>
+            </div>
+            <div id="numbersStatusList" class="numbers-status">
+                <!-- ستظهر هنا وسوم الأرقام -->
+            </div>
+            <div id="currentAction" style="color:#bbf7d0; margin-top: 15px; text-align: center;"></div>
+        </div>
+
+        <div class="footer-note">
+            <i class="far fa-clock"></i> تأخير عشوائي بين 3 - 13 دقيقة بين كل إرسال.
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        "use strict";
+
+        // ---------- المتغيرات العامة ----------
+        const rawNumbersArea = document.getElementById('rawNumbers');
+        const filterBtn = document.getElementById('filterBtn');
+        const formattedContainer = document.getElementById('formattedContainer');
+        const messageText = document.getElementById('messageText');
+        const apiTokenInput = document.getElementById('apiToken');
+        const sendBtn = document.getElementById('sendBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const progressPanel = document.getElementById('progressPanel');
+        const progressStats = document.getElementById('progressStats');
+        const progressBar = document.getElementById('progressBar');
+        const numbersStatusList = document.getElementById('numbersStatusList');
+        const currentActionSpan = document.getElementById('currentAction');
+        const resumeBanner = document.getElementById('resumeBanner');
+        const resumeYesBtn = document.getElementById('resumeYesBtn');
+        const resumeNoBtn = document.getElementById('resumeNoBtn');
+
+        // حالة التطبيق
+        let formattedNumbers = [];            // الأرقام بعد التنسيق (نظيفة)
+        let sendingActive = false;
+        let currentIndex = 0;
+        let totalNumbers = 0;
+        let timeoutId = null;
+        let sendStatuses = [];                // لكل رقم: 'pending', 'sent', 'error'
+
+        // مفتاح localStorage
+        const STORAGE_KEY = 'whatsapp_sender_session';
+
+        // API endpoint
+        const API_URL = 'https://whatsapp.tkwin.com.sa/api/v1/send';
+
+        // ---------- دوال مساعدة للتنسيق (966 + 9 أرقام) ----------
+        function formatSingleNumber(raw) {
+            // إزالة كل شيء غير الأرقام
+            let digits = raw.replace(/\D/g, '');
+            if (digits.length === 0) return null;
+
+            // إذا بدأ بـ 0 (محلي) نحذف الأصفار البادئة ثم نضيف 966
+            if (digits.startsWith('0')) {
+                digits = digits.replace(/^0+/, ''); // حذف كل الأصفار من البداية
+                if (digits.length === 0) return null;
+                digits = '966' + digits;
+            } 
+            else if (digits.startsWith('966')) {
+                // لدينا 966 في البداية، نتأكد من إزالة الصفر مباشرة بعد 966 إن وجد
+                let afterPrefix = digits.substring(3); // ما بعد 966
+                if (afterPrefix.startsWith('0')) {
+                    afterPrefix = afterPrefix.replace(/^0+/, '');
+                }
+                digits = '966' + afterPrefix;
+            } else {
+                // أي حالة أخرى نضيف 966
+                digits = '966' + digits;
+            }
+
+            // الآن نتأكد أن الطول 12 (966 + 9 أرقام)
+            if (digits.length > 12) {
+                digits = digits.substring(0, 12);
+            } else if (digits.length < 12) {
+                // إذا كان أقل من 12 نتركه كما هو (قد يكون ناقص) لكن المستخدم سيرى
+                // يمكن إضافة تحذير لكن نكتفي
+            }
+            return digits;
+        }
+
+        function processNumbers(inputText) {
+            const lines = inputText.split(/\n|,|;|\s+/); // فصل بأي فاصل شائع
+            const formatted = [];
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '') continue;
+                const formattedNum = formatSingleNumber(line);
+                if (formattedNum && formattedNum.length >= 11) { // على الأقل 11 رقم (966xxxxxxxx)
+                    formatted.push(formattedNum);
+                }
+            }
+            // إزالة التكرارات
+            return [...new Set(formatted)];
+        }
+
+        function updateFormattedDisplay(numbers) {
+            formattedContainer.innerHTML = '';
+            if (numbers.length === 0) {
+                formattedContainer.innerHTML = '<div style="color: #f87171;">لا توجد أرقام صالحة</div>';
+                return;
+            }
+            numbers.forEach(num => {
+                const div = document.createElement('div');
+                div.textContent = num;
+                formattedContainer.appendChild(div);
+            });
+        }
+
+        // ---------- تخزين / استعادة الجلسة ----------
+        function saveSession() {
+            if (!sendingActive && formattedNumbers.length === 0) {
+                localStorage.removeItem(STORAGE_KEY);
+                return;
+            }
+            const session = {
+                formattedNumbers,
+                message: messageText.value,
+                token: apiTokenInput.value,
+                currentIndex,
+                sendStatuses,
+                sendingActive,
+                totalNumbers: formattedNumbers.length
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return null;
+            try {
+                return JSON.parse(saved);
+            } catch(e) {
+                return null;
+            }
+        }
+
+        function clearSession() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+        // عرض بانر الاستئناف عند وجود جلسة غير مكتملة
+        function checkForResume() {
+            const session = loadSession();
+            if (session && session.sendingActive === true && session.formattedNumbers && session.formattedNumbers.length > 0) {
+                resumeBanner.style.display = 'flex';
+            } else {
+                resumeBanner.style.display = 'none';
+            }
+        }
+
+        // استئناف الإرسال
+        function resumeSending() {
+            const session = loadSession();
+            if (!session) return false;
+            formattedNumbers = session.formattedNumbers || [];
+            messageText.value = session.message || '';
+            apiTokenInput.value = session.token || '';
+            currentIndex = session.currentIndex || 0;
+            sendStatuses = session.sendStatuses || new Array(formattedNumbers.length).fill('pending');
+            totalNumbers = formattedNumbers.length;
+            sendingActive = true;
+
+            updateFormattedDisplay(formattedNumbers);
+            progressPanel.style.display = 'block';
+            sendBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-flex';
+            renderStatusList();
+            updateProgress();
+
+            // استمرار الإرسال من النقطة الحالية
+            if (currentIndex < totalNumbers) {
+                scheduleNextSend();
+            } else {
+                finishSending();
+            }
+            resumeBanner.style.display = 'none';
+            return true;
+        }
+
+        // ---------- عرض حالة الأرقام ----------
+        function renderStatusList() {
+            numbersStatusList.innerHTML = '';
+            formattedNumbers.forEach((num, idx) => {
+                const tag = document.createElement('span');
+                tag.className = 'number-tag';
+                const status = sendStatuses[idx] || 'pending';
+                if (status === 'sent') tag.classList.add('tag-sent');
+                else if (status === 'error') tag.classList.add('tag-error');
+                else tag.classList.add('tag-pending');
+
+                let icon = '⏳';
+                if (status === 'sent') icon = '✅';
+                else if (status === 'error') icon = '❌';
+                
+                tag.innerHTML = `${icon} ${num}`;
+                numbersStatusList.appendChild(tag);
+            });
+        }
+
+        function updateProgress() {
+            const sentCount = sendStatuses.filter(s => s === 'sent').length;
+            const total = totalNumbers;
+            progressStats.textContent = `${sentCount} / ${total}`;
+            const percent = total === 0 ? 0 : (sentCount / total) * 100;
+            progressBar.style.width = percent + '%';
+        }
+
+        // إنهاء الإرسال
+        function finishSending() {
+            sendingActive = false;
+            sendBtn.style.display = 'inline-flex';
+            stopBtn.style.display = 'none';
+            currentActionSpan.textContent = '✨ تم الانتهاء من الإرسال ✨';
+            clearSession();
+        }
+
+        // إرسال رسالة واحدة
+        async function sendMessage(number) {
+            const token = apiTokenInput.value.trim();
+            if (!token) throw new Error('الرجاء إدخال رمز المصادقة');
+
+            const payload = {
+                to: number,
+                message: messageText.value || ' '
+            };
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            return await response.json();
+        }
+
+        // جدولة الإرسال التالي
+        function scheduleNextSend() {
+            if (!sendingActive) return;
+            if (timeoutId) clearTimeout(timeoutId);
+
+            if (currentIndex >= totalNumbers) {
+                finishSending();
+                return;
+            }
+
+            const currentNumber = formattedNumbers[currentIndex];
+            currentActionSpan.textContent = `⏱️ جاري التحضير لإرسال ${currentNumber} ...`;
+
+            // تنفيذ الإرسال الفعلي
+            const performSend = async () => {
+                if (!sendingActive) return;
+                try {
+                    currentActionSpan.textContent = `📤 جاري إرسال ${currentNumber} ...`;
+                    await sendMessage(currentNumber);
+                    
+                    // نجاح
+                    sendStatuses[currentIndex] = 'sent';
+                } catch (err) {
+                    console.error(err);
+                    sendStatuses[currentIndex] = 'error';
+                    currentActionSpan.textContent = `❌ فشل إرسال ${currentNumber}: ${err.message}`;
+                }
+                
+                renderStatusList();
+                updateProgress();
+                saveSession();
+
+                // الانتقال للرقم التالي
+                currentIndex++;
+                
+                if (currentIndex < totalNumbers && sendingActive) {
+                    // تأخير عشوائي بين 3 دقائق (180000 مللي) و 13 دقيقة (780000 مللي)
+                    const minDelay = 3 * 60 * 1000;
+                    const maxDelay = 13 * 60 * 1000;
+                    const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+                    const minutes = Math.floor(delay / 60000);
+                    const seconds = Math.floor((delay % 60000) / 1000);
+                    currentActionSpan.textContent = `⏳ انتظار ${minutes} دقيقة و ${seconds} ثانية قبل الإرسال التالي...`;
+                    
+                    timeoutId = setTimeout(() => {
+                        scheduleNextSend();
+                    }, delay);
+                    
+                    saveSession();
+                } else {
+                    finishSending();
+                }
+            };
+
+            // البدء فوراً بدون تأخير للرقم الحالي
+            performSend();
+        }
+
+        // بدء عملية إرسال جديدة
+        function startSending() {
+            if (formattedNumbers.length === 0) {
+                alert('الرجاء تصفية الأرقام أولاً.');
+                return;
+            }
+            if (!apiTokenInput.value.trim()) {
+                alert('الرجاء إدخال رمز المصادقة (Bearer Token).');
+                return;
+            }
+
+            // إعادة تعيين الحالة
+            sendingActive = true;
+            currentIndex = 0;
+            totalNumbers = formattedNumbers.length;
+            sendStatuses = new Array(totalNumbers).fill('pending');
+            
+            progressPanel.style.display = 'block';
+            sendBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-flex';
+            
+            renderStatusList();
+            updateProgress();
+            currentActionSpan.textContent = '🚀 بدء الإرسال...';
+            
+            saveSession();
+            scheduleNextSend();
+        }
+
+        function stopSending() {
+            sendingActive = false;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            sendBtn.style.display = 'inline-flex';
+            stopBtn.style.display = 'none';
+            currentActionSpan.textContent = '⏸️ تم إيقاف الإرسال يدوياً.';
+            // حفظ الحالة لإمكانية الاستئناف
+            saveSession();
+        }
+
+        // ---------- مستمعي الأحداث ----------
+        filterBtn.addEventListener('click', () => {
+            const rawText = rawNumbersArea.value;
+            formattedNumbers = processNumbers(rawText);
+            updateFormattedDisplay(formattedNumbers);
+            // تحديث الجلسة (بدون إرسال)
+            if (formattedNumbers.length) {
+                // لا نغير sendingActive
+            }
+        });
+
+        sendBtn.addEventListener('click', startSending);
+
+        stopBtn.addEventListener('click', stopSending);
+
+        // استئناف الجلسة
+        resumeYesBtn.addEventListener('click', () => {
+            resumeSending();
+        });
+
+        resumeNoBtn.addEventListener('click', () => {
+            clearSession();
+            resumeBanner.style.display = 'none';
+        });
+
+        // قبل إغلاق الصفحة - تحذير بسيط
+        window.addEventListener('beforeunload', (e) => {
+            if (sendingActive) {
+                saveSession();
+                e.preventDefault();
+                e.returnValue = 'عملية الإرسال ما زالت نشطة. يمكنك العودة لاحقاً لاستئنافها.';
+            }
+        });
+
+        // عند التحميل: التحقق من وجود جلسة
+        window.addEventListener('load', () => {
+            checkForResume();
+            // إذا كان هناك جلسة غير نشطة لكن sendingActive=false قد نعرضها فقط
+        });
+
+        // تحديث الجلسة عند تغيير الحقول المهمة
+        messageText.addEventListener('input', () => { if (sendingActive) saveSession(); });
+        apiTokenInput.addEventListener('input', () => { if (sendingActive) saveSession(); });
+
+        // إضافة لمسة: إذا كان هناك أرقام منسقة مسبقاً في الجلسة نعرضها
+        const savedSession = loadSession();
+        if (savedSession && savedSession.formattedNumbers) {
+            formattedNumbers = savedSession.formattedNumbers;
+            updateFormattedDisplay(formattedNumbers);
+            if (savedSession.message) messageText.value = savedSession.message;
+            if (savedSession.token) apiTokenInput.value = savedSession.token;
+        }
+
+        // للراحة: مثال أولي في حقل الأرقام
+        rawNumbersArea.value = '0561234567\n966501234567\n0555123456\n00966501234567\n+966 50 123 4567';
+    })();
+</script>
+</body>
+</html>
