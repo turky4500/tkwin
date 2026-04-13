@@ -3,16 +3,6 @@ const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const { initializeDatabase, getDb } = require('./database');
 
-// مكتبة Twilio لإرسال SMS (اختياري)
-let twilioClient = null;
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-  const twilio = require('twilio');
-  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  console.log('Twilio configured – SMS reports enabled.');
-} else {
-  console.log('Twilio not configured – SMS reports disabled.');
-}
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -27,25 +17,28 @@ initializeDatabase().catch(console.error);
 
 // ========== دوال مساعدة ==========
 
-// إرسال رسالة SMS (باستخدام Twilio)
-async function sendSMS(to, body) {
-  if (!twilioClient) {
-    console.log('SMS would be sent to:', to, 'Body:', body);
-    return;
-  }
+// إرسال تقرير عبر واتساب (نفس API الإرسال)
+async function sendWhatsAppReport(to, body, token) {
+  const url = 'https://whatsapp.tkwin.com.sa/api/v1/send';
+  const payload = { to, message: body };
+
   try {
-    await twilioClient.messages.create({
-      body,
-      to,
-      from: process.env.TWILIO_PHONE_NUMBER
+    const response = await axios.post(url, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
     });
-    console.log(`SMS sent to ${to}`);
+    console.log(`WhatsApp report sent to ${to}`);
+    return response.data;
   } catch (error) {
-    console.error('SMS failed:', error.message);
+    console.error(`Failed to send WhatsApp report to ${to}:`, error.message);
+    // لا نعيد رمي الخطأ حتى لا يؤثر على سير الحملة
   }
 }
 
-// دالة إرسال رسالة واتساب واحدة
+// دالة إرسال رسالة واتساب واحدة (للحملة)
 async function sendWhatsAppMessage(to, message, token) {
   const url = 'https://whatsapp.tkwin.com.sa/api/v1/send';
   const payload = { to, message };
@@ -187,7 +180,7 @@ async function startBackgroundSending(campaignId) {
 
   // إنهاء الحملة (مكتملة أو فشلت كلها)
   const final = await db.get(
-    `SELECT sent_count, failed_count, total_numbers, phone_number FROM campaigns WHERE campaign_id = ?`,
+    `SELECT sent_count, failed_count, total_numbers, phone_number, user_token FROM campaigns WHERE campaign_id = ?`,
     [campaignId]
   );
   let finalStatus = 'completed';
@@ -198,10 +191,10 @@ async function startBackgroundSending(campaignId) {
     [finalStatus, campaignId]
   );
 
-  // إرسال تقرير SMS إذا طلب المستخدم
+  // إرسال تقرير واتساب إذا طلب المستخدم
   if (final.phone_number) {
-    const report = `حملة ${campaignId} انتهت. تم إرسال ${final.sent_count} من ${final.total_numbers} بنجاح. فشل: ${final.failed_count}.`;
-    await sendSMS(final.phone_number, report);
+    const report = `📊 تقرير حملة ${campaignId}\n✅ تم الإرسال بنجاح: ${final.sent_count}\n❌ فشل: ${final.failed_count}\n📋 الإجمالي: ${final.total_numbers}`;
+    await sendWhatsAppReport(final.phone_number, report, final.user_token);
   }
 }
 
