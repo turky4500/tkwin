@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-sender-backend",
-  "version": "1.1.0",
-  "description": "Multi-user WhatsApp bulk sender with campaign tracking, pause/resume, countdown and SMS report",
+  "version": "1.2.0",
+  "description": "Multi-user WhatsApp bulk sender with campaign tracking and WhatsApp report",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -11,7 +11,6 @@
     "axios": "^1.4.0",
     "sqlite3": "^5.1.6",
     "sqlite": "^5.1.1",
-    "uuid": "^9.0.0",
-    "twilio": "^4.19.0"
+    "uuid": "^9.0.0"
   }
 }
