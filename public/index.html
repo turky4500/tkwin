@@ -6,13 +6,13 @@
     <title>مرسل واتساب السحابي | تحكم كامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* نفس الستايل السابق مع إضافات بسيطة */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
         }
+
         body {
             background: linear-gradient(145deg, #0b2b40 0%, #1e4e62 100%);
             min-height: 100vh;
@@ -21,11 +21,13 @@
             justify-content: center;
             align-items: center;
         }
+
         .container {
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
         }
+
         .glass-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(14px);
@@ -35,6 +37,7 @@
             padding: 30px 25px;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 230, 250, 0.2) inset;
         }
+
         h1 {
             color: #ffffff;
             text-align: center;
@@ -43,6 +46,11 @@
             font-size: 2.8rem;
             text-shadow: 0 5px 20px #00e5ff;
         }
+
+        h1 i {
+            margin: 0 10px;
+        }
+
         h2 {
             color: #e6f7ff;
             margin-bottom: 18px;
@@ -50,12 +58,14 @@
             border-right: 6px solid #00e5ff;
             padding-right: 20px;
         }
+
         .tabs {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
             justify-content: center;
         }
+
         .tab-btn {
             background: transparent;
             border: 2px solid #2dd4bf;
@@ -66,32 +76,41 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+
         .tab-btn.active {
             background: #2dd4bf;
             color: #022c3a;
             font-weight: bold;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
         }
+
         .grid-2col {
             display: grid;
             grid-template-columns: 1.2fr 0.9fr;
             gap: 25px;
             margin-bottom: 30px;
         }
+
         @media (max-width: 800px) {
-            .grid-2col { grid-template-columns: 1fr; }
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
         }
+
         .input-area {
             background: rgba(8, 40, 55, 0.7);
             border-radius: 30px;
             padding: 22px 20px;
             border: 1px solid #2dd4bf60;
         }
+
         label {
             display: block;
             color: #c2f0ff;
@@ -99,6 +118,12 @@
             font-weight: 600;
             font-size: 1.2rem;
         }
+
+        label i {
+            margin-left: 10px;
+            color: #2dd4bf;
+        }
+
         textarea, input[type="text"], input[type="password"] {
             width: 100%;
             padding: 16px 18px;
@@ -109,6 +134,13 @@
             font-size: 1rem;
             resize: vertical;
         }
+
+        textarea:focus, input:focus {
+            border-color: #2dd4bf;
+            outline: none;
+            box-shadow: 0 0 18px #2dd4bf, inset 0 2px 5px #000;
+        }
+
         .filter-btn, .action-btn {
             background: linear-gradient(135deg, #00b4d8, #48cae4);
             border: none;
@@ -120,7 +152,16 @@
             margin: 18px 0 10px;
             cursor: pointer;
             width: 100%;
+            transition: 0.2s;
         }
+
+        .filter-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px #2dd4bf;
+            background: linear-gradient(135deg, #0096c7, #00b4d8);
+            color: white;
+        }
+
         .formatted-list {
             background: #0a2e3c;
             border-radius: 24px;
@@ -130,6 +171,15 @@
             border: 1px solid #2dd4bf;
             margin-top: 15px;
         }
+
+        .formatted-list div {
+            color: #d1fae5;
+            padding: 8px 12px;
+            border-bottom: 1px dashed #2dd4bf60;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+
         .send-btn {
             background: #25d366;
             color: #01181f;
@@ -148,6 +198,13 @@
             justify-content: center;
             gap: 15px;
         }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #1e7b4c;
+        }
+
         .progress-panel {
             background: #0e2a36e0;
             border-radius: 30px;
@@ -155,6 +212,7 @@
             margin-top: 30px;
             border: 1px solid #facc15;
         }
+
         .status-header {
             display: flex;
             justify-content: space-between;
@@ -162,6 +220,7 @@
             font-size: 1.3rem;
             margin-bottom: 15px;
         }
+
         .progress-bar-container {
             height: 22px;
             background: #1e3a4b;
@@ -169,12 +228,15 @@
             margin: 15px 0;
             overflow: hidden;
         }
+
         .progress-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #2dd4bf, #facc15);
             border-radius: 40px;
+            transition: width 0.3s;
         }
+
         .numbers-status {
             display: flex;
             flex-wrap: wrap;
@@ -183,16 +245,20 @@
             overflow-y: auto;
             padding: 10px 5px;
         }
+
         .number-tag {
             background: #1e4a5f;
             padding: 8px 18px;
             border-radius: 40px;
             color: white;
             font-family: monospace;
+            font-size: 1.1rem;
         }
+
         .tag-sent { background: #14532d; border-color: #86efac; }
         .tag-pending { background: #b45309; }
         .tag-error { background: #991b1b; }
+
         .campaign-id-box {
             background: #0b3b4e;
             border-radius: 20px;
@@ -202,6 +268,7 @@
             text-align: center;
             font-size: 1.2rem;
         }
+
         .countdown-timer {
             background: #1e4a5f;
             border-radius: 50px;
@@ -215,12 +282,14 @@
             font-weight: bold;
             font-family: monospace;
         }
+
         .control-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin: 15px 0;
         }
+
         .control-btn {
             background: #1e4a5f;
             border: 1px solid #2dd4bf;
@@ -229,22 +298,49 @@
             border-radius: 40px;
             font-size: 1rem;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .footer-note { color: #b3e4ff; text-align: center; margin-top: 25px; }
-        .phone-input { direction: ltr; text-align: left; }
+
+        .control-btn:hover {
+            background: #2dd4bf;
+            color: #022c3a;
+        }
+
+        .footer-note {
+            color: #b3e4ff;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .phone-input {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .small-note {
+            color: #b3e4ff;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: block;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="glass-card">
-        <h1><i class="fab fa-whatsapp"></i> مرسل واتساب السحابي <i class="fas fa-cloud-upload-alt"></i></h1>
+        <h1>
+            <i class="fab fa-whatsapp"></i>
+            مرسل واتساب السحابي
+            <i class="fas fa-cloud-upload-alt"></i>
+        </h1>
 
+        <!-- تبويبات -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="new">🚀 حملة جديدة</button>
             <button class="tab-btn" data-tab="track">🔍 متابعة حملة</button>
         </div>
 
-        <!-- تبويب حملة جديدة -->
+        <!-- ========== تبويب حملة جديدة ========== -->
         <div id="tab-new" class="tab-content active">
             <div class="grid-2col">
                 <div class="input-area">
@@ -274,8 +370,9 @@
                     </div>
 
                     <div style="margin-top:20px;">
-                        <label><i class="fas fa-mobile-alt"></i> رقم الجوال لاستلام التقرير (اختياري)</label>
+                        <label><i class="fab fa-whatsapp"></i> رقم واتساب لاستلام تقرير انتهاء الحملة (اختياري)</label>
                         <input type="text" id="phoneNumber" class="phone-input" placeholder="مثال: 966501234567" value="">
+                        <small class="small-note">سيتم إرسال تقرير مختصر عند اكتمال الحملة أو فشلها باستخدام نفس التوكن.</small>
                     </div>
                 </div>
             </div>
@@ -293,7 +390,7 @@
             </div>
         </div>
 
-        <!-- تبويب متابعة حملة -->
+        <!-- ========== تبويب متابعة حملة ========== -->
         <div id="tab-track" class="tab-content">
             <div class="input-area">
                 <label><i class="fas fa-search"></i> أدخل معرف الحملة (Campaign ID)</label>
@@ -337,7 +434,7 @@
 
         let formattedNumbers = [];
 
-        // التبويبات
+        // ---------- التبويبات ----------
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const target = tab.dataset.tab;
@@ -348,7 +445,7 @@
             });
         });
 
-        // تنسيق الأرقام
+        // ---------- تنسيق الأرقام ----------
         function formatSingleNumber(raw) {
             let digits = raw.replace(/\D/g, '');
             if (digits.length === 0) return null;
@@ -396,7 +493,7 @@
             quickSummary.style.display = 'block';
         });
 
-        // بدء حملة جديدة
+        // ---------- بدء حملة جديدة ----------
         sendBtn.addEventListener('click', async () => {
             if (formattedNumbers.length === 0) {
                 alert('الرجاء تصفية الأرقام أولاً.');
@@ -409,6 +506,7 @@
             }
             const message = messageText.value.trim() || ' ';
             const phone = phoneNumberInput.value.trim() || null;
+            
             const confirmMsg = `سيتم إرسال الرسالة إلى ${formattedNumbers.length} رقم.\nهل تريد المتابعة؟`;
             if (!confirm(confirmMsg)) return;
 
@@ -442,7 +540,7 @@
             alert('تم نسخ المعرف');
         });
 
-        // متابعة حملة (مع تحكم وعد تنازلي)
+        // ---------- متابعة حملة ----------
         trackBtn.addEventListener('click', async () => {
             const campaignId = trackCampaignId.value.trim();
             if (!campaignId) {
