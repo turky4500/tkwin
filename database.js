@@ -10,7 +10,7 @@ async function initializeDatabase() {
     driver: sqlite3.Database
   });
 
-  // جدول الحملات الرئيسية
+  // جدول الحملات الرئيسية – أضفنا أعمدة للهاتف وحالة التحكم
   await db.exec(`
     CREATE TABLE IF NOT EXISTS campaigns (
       campaign_id TEXT PRIMARY KEY,
@@ -21,12 +21,14 @@ async function initializeDatabase() {
       sent_count INTEGER DEFAULT 0,
       failed_count INTEGER DEFAULT 0,
       current_index INTEGER DEFAULT 0,
+      phone_number TEXT,
+      control_status TEXT DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
-  // جدول الأرقام المفردة (لحفظ حالة كل رقم)
+  // جدول الأرقام المفردة (بدون تغيير)
   await db.exec(`
     CREATE TABLE IF NOT EXISTS campaign_numbers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +41,7 @@ async function initializeDatabase() {
     )
   `);
 
-  console.log('Database initialized.');
+  console.log('Database initialized with new fields.');
 }
 
 function getDb() {
