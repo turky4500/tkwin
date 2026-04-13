@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مرسل واتساب السحابي</title>
+    <title>مرسل واتساب السحابي | تحكم كامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* نفس الستايل السابق مع إضافات بسيطة لقسم المتابعة */
+        /* نفس الستايل السابق مع إضافات بسيطة */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
         }
-
         body {
             background: linear-gradient(145deg, #0b2b40 0%, #1e4e62 100%);
             min-height: 100vh;
@@ -22,13 +21,11 @@
             justify-content: center;
             align-items: center;
         }
-
         .container {
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
         }
-
         .glass-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(14px);
@@ -38,7 +35,6 @@
             padding: 30px 25px;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 230, 250, 0.2) inset;
         }
-
         h1 {
             color: #ffffff;
             text-align: center;
@@ -47,7 +43,6 @@
             font-size: 2.8rem;
             text-shadow: 0 5px 20px #00e5ff;
         }
-
         h2 {
             color: #e6f7ff;
             margin-bottom: 18px;
@@ -55,14 +50,12 @@
             border-right: 6px solid #00e5ff;
             padding-right: 20px;
         }
-
         .tabs {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
             justify-content: center;
         }
-
         .tab-btn {
             background: transparent;
             border: 2px solid #2dd4bf;
@@ -73,41 +66,32 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
         .tab-btn.active {
             background: #2dd4bf;
             color: #022c3a;
             font-weight: bold;
         }
-
         .tab-content {
             display: none;
         }
-
         .tab-content.active {
             display: block;
         }
-
         .grid-2col {
             display: grid;
             grid-template-columns: 1.2fr 0.9fr;
             gap: 25px;
             margin-bottom: 30px;
         }
-
         @media (max-width: 800px) {
-            .grid-2col {
-                grid-template-columns: 1fr;
-            }
+            .grid-2col { grid-template-columns: 1fr; }
         }
-
         .input-area {
             background: rgba(8, 40, 55, 0.7);
             border-radius: 30px;
             padding: 22px 20px;
             border: 1px solid #2dd4bf60;
         }
-
         label {
             display: block;
             color: #c2f0ff;
@@ -115,7 +99,6 @@
             font-weight: 600;
             font-size: 1.2rem;
         }
-
         textarea, input[type="text"], input[type="password"] {
             width: 100%;
             padding: 16px 18px;
@@ -126,8 +109,7 @@
             font-size: 1rem;
             resize: vertical;
         }
-
-        .filter-btn {
+        .filter-btn, .action-btn {
             background: linear-gradient(135deg, #00b4d8, #48cae4);
             border: none;
             color: #022c3a;
@@ -139,7 +121,6 @@
             cursor: pointer;
             width: 100%;
         }
-
         .formatted-list {
             background: #0a2e3c;
             border-radius: 24px;
@@ -149,7 +130,6 @@
             border: 1px solid #2dd4bf;
             margin-top: 15px;
         }
-
         .send-btn {
             background: #25d366;
             color: #01181f;
@@ -168,7 +148,6 @@
             justify-content: center;
             gap: 15px;
         }
-
         .progress-panel {
             background: #0e2a36e0;
             border-radius: 30px;
@@ -176,7 +155,6 @@
             margin-top: 30px;
             border: 1px solid #facc15;
         }
-
         .status-header {
             display: flex;
             justify-content: space-between;
@@ -184,7 +162,6 @@
             font-size: 1.3rem;
             margin-bottom: 15px;
         }
-
         .progress-bar-container {
             height: 22px;
             background: #1e3a4b;
@@ -192,14 +169,12 @@
             margin: 15px 0;
             overflow: hidden;
         }
-
         .progress-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #2dd4bf, #facc15);
             border-radius: 40px;
         }
-
         .numbers-status {
             display: flex;
             flex-wrap: wrap;
@@ -208,7 +183,6 @@
             overflow-y: auto;
             padding: 10px 5px;
         }
-
         .number-tag {
             background: #1e4a5f;
             padding: 8px 18px;
@@ -216,11 +190,9 @@
             color: white;
             font-family: monospace;
         }
-
         .tag-sent { background: #14532d; border-color: #86efac; }
         .tag-pending { background: #b45309; }
         .tag-error { background: #991b1b; }
-
         .campaign-id-box {
             background: #0b3b4e;
             border-radius: 20px;
@@ -230,12 +202,36 @@
             text-align: center;
             font-size: 1.2rem;
         }
-
-        .footer-note {
-            color: #b3e4ff;
+        .countdown-timer {
+            background: #1e4a5f;
+            border-radius: 50px;
+            padding: 10px 25px;
+            margin: 15px 0;
             text-align: center;
-            margin-top: 25px;
+            display: inline-block;
+            border: 1px solid #facc15;
+            color: #fde68a;
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: monospace;
         }
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .control-btn {
+            background: #1e4a5f;
+            border: 1px solid #2dd4bf;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .footer-note { color: #b3e4ff; text-align: center; margin-top: 25px; }
+        .phone-input { direction: ltr; text-align: left; }
     </style>
 </head>
 <body>
@@ -243,7 +239,6 @@
     <div class="glass-card">
         <h1><i class="fab fa-whatsapp"></i> مرسل واتساب السحابي <i class="fas fa-cloud-upload-alt"></i></h1>
 
-        <!-- تبويبات -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="new">🚀 حملة جديدة</button>
             <button class="tab-btn" data-tab="track">🔍 متابعة حملة</button>
@@ -273,9 +268,14 @@
                     <label><i class="fas fa-comment-dots"></i> نص الرسالة</label>
                     <textarea id="messageText" rows="4" placeholder="أهلاً بك، هذه رسالة تجريبية..."></textarea>
                     
-                    <div class="token-box" style="margin-top:20px;">
+                    <div style="margin-top:20px;">
                         <label><i class="fas fa-key"></i> رمز المصادقة (Bearer Token)</label>
                         <input type="password" id="apiToken" placeholder="أدخل الرمز السري الخاص بك" autocomplete="off">
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <label><i class="fas fa-mobile-alt"></i> رقم الجوال لاستلام التقرير (اختياري)</label>
+                        <input type="text" id="phoneNumber" class="phone-input" placeholder="مثال: 966501234567" value="">
                     </div>
                 </div>
             </div>
@@ -324,6 +324,7 @@
         const formattedContainer = document.getElementById('formattedContainer');
         const messageText = document.getElementById('messageText');
         const apiTokenInput = document.getElementById('apiToken');
+        const phoneNumberInput = document.getElementById('phoneNumber');
         const sendBtn = document.getElementById('sendBtn');
         const quickSummary = document.getElementById('quickSummary');
         const validCountSpan = document.getElementById('validCount');
@@ -336,7 +337,7 @@
 
         let formattedNumbers = [];
 
-        // ---------- التبويبات ----------
+        // التبويبات
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const target = tab.dataset.tab;
@@ -347,7 +348,7 @@
             });
         });
 
-        // ---------- دوال تنسيق الأرقام ----------
+        // تنسيق الأرقام
         function formatSingleNumber(raw) {
             let digits = raw.replace(/\D/g, '');
             if (digits.length === 0) return null;
@@ -395,7 +396,7 @@
             quickSummary.style.display = 'block';
         });
 
-        // ---------- بدء حملة جديدة ----------
+        // بدء حملة جديدة
         sendBtn.addEventListener('click', async () => {
             if (formattedNumbers.length === 0) {
                 alert('الرجاء تصفية الأرقام أولاً.');
@@ -407,6 +408,7 @@
                 return;
             }
             const message = messageText.value.trim() || ' ';
+            const phone = phoneNumberInput.value.trim() || null;
             const confirmMsg = `سيتم إرسال الرسالة إلى ${formattedNumbers.length} رقم.\nهل تريد المتابعة؟`;
             if (!confirm(confirmMsg)) return;
 
@@ -417,13 +419,12 @@
                 const response = await fetch('/api/campaigns', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ numbers: formattedNumbers, message, token })
+                    body: JSON.stringify({ numbers: formattedNumbers, message, token, phone })
                 });
                 const data = await response.json();
                 if (data.success) {
                     campaignCreatedInfo.style.display = 'block';
                     createdCampaignIdSpan.textContent = data.campaignId;
-                    // مسح الحقول (اختياري)
                 } else {
                     alert('فشل: ' + (data.error || 'خطأ غير معروف'));
                 }
@@ -441,25 +442,29 @@
             alert('تم نسخ المعرف');
         });
 
-        // ---------- متابعة حملة ----------
+        // متابعة حملة (مع تحكم وعد تنازلي)
         trackBtn.addEventListener('click', async () => {
             const campaignId = trackCampaignId.value.trim();
             if (!campaignId) {
                 alert('الرجاء إدخال معرف الحملة');
                 return;
             }
+            await loadCampaignData(campaignId);
+        });
+
+        async function loadCampaignData(campaignId) {
             try {
                 const res = await fetch(`/api/campaigns/${campaignId}`);
-                const data = await res.json();
+                const campaign = await res.json();
                 if (res.ok) {
-                    displayCampaignProgress(data);
+                    displayCampaignProgress(campaign);
                 } else {
-                    alert(data.error || 'الحملة غير موجودة');
+                    alert(campaign.error || 'الحملة غير موجودة');
                 }
             } catch (err) {
                 alert('خطأ في الاتصال');
             }
-        });
+        }
 
         function displayCampaignProgress(campaign) {
             trackProgressPanel.style.display = 'block';
@@ -477,14 +482,41 @@
                 numbersHtml += `<span class="number-tag ${cls}">${icon} ${n.phone_number}</span>`;
             });
 
+            // بناء العد التنازلي
+            let countdownHtml = '';
+            if (campaign.countdown) {
+                const mins = campaign.countdown.minutes;
+                const secs = campaign.countdown.seconds;
+                countdownHtml = `
+                    <div class="countdown-timer">
+                        ⏳ الإرسال التالي خلال: ${mins}:${secs.toString().padStart(2,'0')}
+                    </div>
+                `;
+            } else if (campaign.status === 'processing' && campaign.control_status === 'active') {
+                countdownHtml = `<div class="countdown-timer">⏳ جارٍ الإرسال الحالي...</div>`;
+            }
+
+            // أزرار التحكم
+            const controlButtons = `
+                <div class="control-buttons">
+                    ${campaign.control_status === 'active' ? 
+                        `<button class="control-btn pause-btn" data-action="pause"><i class="fas fa-pause"></i> إيقاف مؤقت</button>` : ''}
+                    ${campaign.control_status === 'paused' ? 
+                        `<button class="control-btn resume-btn" data-action="resume"><i class="fas fa-play"></i> استئناف</button>` : ''}
+                    <button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>
+                </div>
+            `;
+
             trackProgressPanel.innerHTML = `
                 <div class="status-header">
-                    <span>الحالة: ${campaign.status === 'completed' ? '✅ مكتملة' : (campaign.status === 'processing' ? '⚙️ قيد التنفيذ' : '⏳ معلقة')}</span>
+                    <span>الحالة: ${getStatusText(campaign)}</span>
                     <span>${sent} / ${total}</span>
                 </div>
                 <div class="progress-bar-container">
                     <div class="progress-bar" style="width:${percent}%"></div>
                 </div>
+                ${countdownHtml}
+                ${controlButtons}
                 <div style="color:white; margin:10px 0;">
                     <i class="fas fa-check-circle" style="color:#86efac;"></i> تم الإرسال: ${sent} &nbsp;&nbsp;
                     <i class="fas fa-times-circle" style="color:#fca5a5;"></i> فشل: ${failed}
@@ -496,9 +528,46 @@
                     ${campaign.status === 'processing' ? '<i class="fas fa-sync-alt fa-spin"></i> الإرسال مستمر...' : ''}
                 </div>
             `;
+
+            // إضافة مستمعي الأحداث لأزرار التحكم
+            document.querySelector('.pause-btn')?.addEventListener('click', () => controlCampaign(campaign.campaign_id, 'pause'));
+            document.querySelector('.resume-btn')?.addEventListener('click', () => controlCampaign(campaign.campaign_id, 'resume'));
+            document.querySelector('.cancel-btn')?.addEventListener('click', () => {
+                if (confirm('هل أنت متأكد من إلغاء الحملة؟ لن يتم إرسال باقي الرسائل.')) {
+                    controlCampaign(campaign.campaign_id, 'cancel');
+                }
+            });
+
+            // تحديث تلقائي كل 3 ثوانٍ إذا كانت الحملة نشطة
+            if (campaign.status === 'processing' || campaign.status === 'paused') {
+                setTimeout(() => loadCampaignData(campaign.campaign_id), 3000);
+            }
         }
 
-        // إذا كان هناك معرف في الـ URL (اختياري)
+        function getStatusText(campaign) {
+            if (campaign.control_status === 'paused') return '⏸️ متوقفة مؤقتاً';
+            if (campaign.control_status === 'cancelled') return '🚫 ملغية';
+            if (campaign.status === 'completed') return '✅ مكتملة';
+            if (campaign.status === 'processing') return '⚙️ قيد التنفيذ';
+            if (campaign.status === 'pending') return '⏳ معلقة';
+            return campaign.status;
+        }
+
+        async function controlCampaign(campaignId, action) {
+            try {
+                const res = await fetch(`/api/campaigns/${campaignId}/${action}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    await loadCampaignData(campaignId);
+                } else {
+                    alert('فشل تنفيذ الإجراء');
+                }
+            } catch (err) {
+                alert('خطأ في الاتصال');
+            }
+        }
+
+        // فتح تبويب المتابعة تلقائياً إذا كان الرابط يحتوي على معرف
         const urlParams = new URLSearchParams(window.location.search);
         const idFromUrl = urlParams.get('campaign');
         if (idFromUrl) {
