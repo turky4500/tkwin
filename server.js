@@ -34,37 +34,56 @@ async function sendWhatsAppReport(to, body, token) {
     return response.data;
   } catch (error) {
     console.error(`Failed to send WhatsApp report to ${to}:`, error.message);
-    // لا نعيد رمي الخطأ حتى لا يؤثر على سير الحملة
+    // لا نرمي الخطأ لأن التقرير اختياري ولا نريد تعطيل الحملة
   }
 }
 
-// دالة إرسال رسالة واتساب واحدة (للحملة)
-async function sendWhatsAppMessage(to, message, token) {
+// دالة إرسال رسالة واتساب واحدة مع إعادة المحاولة الذكية
+async function sendWhatsAppMessage(to, message, token, maxRetries = 3) {
   const url = 'https://whatsapp.tkwin.com.sa/api/v1/send';
   const payload = { to, message };
+  let lastError;
 
-  const response = await axios.post(url, payload, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    timeout: 30000
-  });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios.post(url, payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+      // نجاح
+      return response.data;
+    } catch (error) {
+      lastError = error;
+      const status = error.response?.status;
 
-  return response.data;
+      // إذا كان الخطأ 429 (تجاوز حد السرعة) أو 403 (قد يكون حظر مؤقت) وحاولنا أقل من الحد الأقصى
+      if ((status === 429 || status === 403) && attempt < maxRetries) {
+        // حساب زمن الانتظار: 2^attempt ثواني (2، 4، 8 ثوان)
+        const waitSeconds = Math.pow(2, attempt);
+        console.log(`⏳ محاولة ${attempt}/${maxRetries} فشلت للرقم ${to} (${status}). الانتظار ${waitSeconds} ثواني...`);
+        await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+        continue;
+      }
+      // إذا كان خطأ آخر أو انتهت المحاولات، ارمِ الخطأ
+      break;
+    }
+  }
+  // إذا وصلنا هنا، جميع المحاولات فشلت
+  throw lastError;
 }
 
 // دالة تنفيذ الإرسال في الخلفية (معدلة لدعم الإيقاف المؤقت/الإلغاء)
 async function startBackgroundSending(campaignId) {
   const db = getDb();
 
-  // تحديث الحالة إلى processing إذا كانت active
   await db.run(
     `UPDATE campaigns SET status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE campaign_id = ?`,
     [campaignId]
   );
 
-  // جلب الأرقام المعلقة
   let numbers = await db.all(
     `SELECT id, phone_number FROM campaign_numbers
      WHERE campaign_id = ? AND status = 'pending'
@@ -72,7 +91,6 @@ async function startBackgroundSending(campaignId) {
     [campaignId]
   );
 
-  // جلب بيانات الحملة
   let campaign = await db.get(
     `SELECT user_token, message, phone_number, control_status FROM campaigns WHERE campaign_id = ?`,
     [campaignId]
@@ -82,7 +100,6 @@ async function startBackgroundSending(campaignId) {
 
   let index = 0;
   while (index < numbers.length) {
-    // التحقق من حالة التحكم قبل كل إرسال
     const currentCampaign = await db.get(
       `SELECT control_status, status FROM campaigns WHERE campaign_id = ?`,
       [campaignId]
@@ -103,12 +120,11 @@ async function startBackgroundSending(campaignId) {
         [campaignId]
       );
       clearCountdown(campaignId);
-      return; // سيتابع عند الاستئناف
+      return;
     }
 
     const { id, phone_number } = numbers[index];
 
-    // تحديث المؤشر الحالي
     await db.run(
       `UPDATE campaigns SET current_index = ? WHERE campaign_id = ?`,
       [index + 1, campaignId]
@@ -126,7 +142,7 @@ async function startBackgroundSending(campaignId) {
         [campaignId]
       );
     } catch (error) {
-      console.error(`Failed to send to ${phone_number}:`, error.message);
+      console.error(`❌ فشل نهائي للإرسال إلى ${phone_number}:`, error.message);
       await db.run(
         `UPDATE campaign_numbers SET status = 'failed', error_message = ? WHERE id = ?`,
         [error.message, id]
@@ -139,30 +155,24 @@ async function startBackgroundSending(campaignId) {
 
     index++;
 
-    // إعادة جلب القائمة إذا تغيرت (في حال استؤنفت)
     if (index >= numbers.length) break;
 
-    // تأخير عشوائي مع تفقد حالة التوقف كل ثانية (لمدة أقصاها 13 دقيقة)
+    // تأخير عشوائي بين 3 و 13 دقيقة
     const minDelay = 3 * 60 * 1000;
     const maxDelay = 13 * 60 * 1000;
     const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
     
-    // تسجيل نهاية العد التنازلي
     const endTime = Date.now() + delay;
     countdownTimers.set(campaignId, { endTime, timeoutId: null });
     
-    // الانتظار مع إمكانية الإيقاف المبكر
     let remaining = delay;
     while (remaining > 0) {
-      // تحقق من حالة الحملة كل 1 ثانية
       const check = await db.get(
         `SELECT control_status FROM campaigns WHERE campaign_id = ?`,
         [campaignId]
       );
       if (check.control_status === 'paused' || check.control_status === 'cancelled') {
-        // إلغاء العد التنازلي وحفظ التقدم
         clearCountdown(campaignId);
-        // تحديث المؤشر ليكون قبل الرقم الحالي (لأنه لم يرسل بعد)
         await db.run(
           `UPDATE campaigns SET current_index = ?, status = ? WHERE campaign_id = ?`,
           [index, check.control_status === 'paused' ? 'paused' : 'cancelled', campaignId]
@@ -174,11 +184,10 @@ async function startBackgroundSending(campaignId) {
       remaining -= sleep;
     }
     
-    // إزالة العداد بعد انتهاء المدة
     countdownTimers.delete(campaignId);
   }
 
-  // إنهاء الحملة (مكتملة أو فشلت كلها)
+  // إنهاء الحملة
   const final = await db.get(
     `SELECT sent_count, failed_count, total_numbers, phone_number, user_token FROM campaigns WHERE campaign_id = ?`,
     [campaignId]
@@ -198,17 +207,12 @@ async function startBackgroundSending(campaignId) {
   }
 }
 
-// مساعد لمسح العداد التنازلي
 function clearCountdown(campaignId) {
-  const timer = countdownTimers.get(campaignId);
-  if (timer) {
-    countdownTimers.delete(campaignId);
-  }
+  countdownTimers.delete(campaignId);
 }
 
 // ========== نقاط النهاية API ==========
 
-// إنشاء حملة جديدة (يدعم رقم الجوال اختياري)
 app.post('/api/campaigns', async (req, res) => {
   const { numbers, message, token, phone } = req.body;
 
@@ -244,7 +248,6 @@ app.post('/api/campaigns', async (req, res) => {
 
     await db.run('COMMIT');
 
-    // بدء الإرسال في الخلفية
     startBackgroundSending(campaignId).catch(err => {
       console.error(`Campaign ${campaignId} failed:`, err);
     });
@@ -261,7 +264,6 @@ app.post('/api/campaigns', async (req, res) => {
   }
 });
 
-// جلب تفاصيل حملة (للمتابعة) – مع العد التنازلي
 app.get('/api/campaigns/:campaignId', async (req, res) => {
   const { campaignId } = req.params;
   const db = getDb();
@@ -286,7 +288,6 @@ app.get('/api/campaigns/:campaignId', async (req, res) => {
       [campaignId]
     );
 
-    // إضافة العد التنازلي إن وجد
     let countdown = null;
     const timer = countdownTimers.get(campaignId);
     if (timer && campaign.status === 'processing' && campaign.control_status === 'active') {
@@ -311,7 +312,6 @@ app.get('/api/campaigns/:campaignId', async (req, res) => {
   }
 });
 
-// إيقاف مؤقت
 app.post('/api/campaigns/:campaignId/pause', async (req, res) => {
   const { campaignId } = req.params;
   const db = getDb();
@@ -327,7 +327,6 @@ app.post('/api/campaigns/:campaignId/pause', async (req, res) => {
   }
 });
 
-// استئناف
 app.post('/api/campaigns/:campaignId/resume', async (req, res) => {
   const { campaignId } = req.params;
   const db = getDb();
@@ -336,7 +335,6 @@ app.post('/api/campaigns/:campaignId/resume', async (req, res) => {
       `UPDATE campaigns SET control_status = 'active', status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE campaign_id = ?`,
       [campaignId]
     );
-    // إعادة تشغيل عملية الإرسال
     startBackgroundSending(campaignId).catch(console.error);
     res.json({ success: true, message: 'تم الاستئناف' });
   } catch (error) {
@@ -344,7 +342,6 @@ app.post('/api/campaigns/:campaignId/resume', async (req, res) => {
   }
 });
 
-// إلغاء نهائي
 app.post('/api/campaigns/:campaignId/cancel', async (req, res) => {
   const { campaignId } = req.params;
   const db = getDb();
