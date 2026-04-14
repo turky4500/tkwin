@@ -10,7 +10,7 @@ async function initializeDatabase() {
     driver: sqlite3.Database
   });
 
-  // جدول الحملات الرئيسية – أضفنا أعمدة للهاتف وحالة التحكم
+  // جدول الحملات الرئيسية
   await db.exec(`
     CREATE TABLE IF NOT EXISTS campaigns (
       campaign_id TEXT PRIMARY KEY,
@@ -28,7 +28,7 @@ async function initializeDatabase() {
     )
   `);
 
-  // جدول الأرقام المفردة (بدون تغيير)
+  // جدول الأرقام المفردة
   await db.exec(`
     CREATE TABLE IF NOT EXISTS campaign_numbers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,11 +37,22 @@ async function initializeDatabase() {
       status TEXT DEFAULT 'pending',
       error_message TEXT,
       sent_at DATETIME,
+      retry_count INTEGER DEFAULT 0,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (campaign_id)
     )
   `);
 
-  console.log('Database initialized with new fields.');
+  // التأكد من وجود عمود retry_count (للجداول القديمة)
+  const tableInfo = await db.all(`PRAGMA table_info(campaign_numbers)`);
+  const hasRetryCount = tableInfo.some(col => col.name === 'retry_count');
+  
+  if (!hasRetryCount) {
+    console.log('جاري إضافة عمود retry_count إلى جدول campaign_numbers...');
+    await db.exec(`ALTER TABLE campaign_numbers ADD COLUMN retry_count INTEGER DEFAULT 0`);
+    console.log('تمت إضافة العمود بنجاح.');
+  }
+
+  console.log('قاعدة البيانات جاهزة.');
 }
 
 function getDb() {
