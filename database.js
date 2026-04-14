@@ -23,6 +23,9 @@ async function initializeDatabase() {
       current_index INTEGER DEFAULT 0,
       phone_number TEXT,
       control_status TEXT DEFAULT 'active',
+      use_time_window INTEGER DEFAULT 0,
+      window_start TEXT,
+      window_end TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -42,14 +45,27 @@ async function initializeDatabase() {
     )
   `);
 
-  // التأكد من وجود عمود retry_count (للجداول القديمة)
-  const tableInfo = await db.all(`PRAGMA table_info(campaign_numbers)`);
-  const hasRetryCount = tableInfo.some(col => col.name === 'retry_count');
-  
+  // التأكد من وجود الأعمدة الجديدة (للجداول القديمة)
+  const tableInfo = await db.all(`PRAGMA table_info(campaigns)`);
+  const hasUseTimeWindow = tableInfo.some(col => col.name === 'use_time_window');
+  const hasWindowStart = tableInfo.some(col => col.name === 'window_start');
+  const hasWindowEnd = tableInfo.some(col => col.name === 'window_end');
+
+  if (!hasUseTimeWindow) {
+    await db.exec(`ALTER TABLE campaigns ADD COLUMN use_time_window INTEGER DEFAULT 0`);
+  }
+  if (!hasWindowStart) {
+    await db.exec(`ALTER TABLE campaigns ADD COLUMN window_start TEXT`);
+  }
+  if (!hasWindowEnd) {
+    await db.exec(`ALTER TABLE campaigns ADD COLUMN window_end TEXT`);
+  }
+
+  // التأكد من وجود عمود retry_count في campaign_numbers
+  const numbersInfo = await db.all(`PRAGMA table_info(campaign_numbers)`);
+  const hasRetryCount = numbersInfo.some(col => col.name === 'retry_count');
   if (!hasRetryCount) {
-    console.log('جاري إضافة عمود retry_count إلى جدول campaign_numbers...');
     await db.exec(`ALTER TABLE campaign_numbers ADD COLUMN retry_count INTEGER DEFAULT 0`);
-    console.log('تمت إضافة العمود بنجاح.');
   }
 
   console.log('قاعدة البيانات جاهزة.');
