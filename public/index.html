@@ -211,6 +211,8 @@
         const trackBtn = document.getElementById('trackBtn');
         const trackCampaignId = document.getElementById('trackCampaignId');
         const trackPanel = document.getElementById('trackProgressPanel');
+        let autoRefreshTimer = null;
+        let isEditingWindow = false;
 
         function getStatusText(c) {
             if (c.control_status === 'paused') return '⏸️ متوقفة مؤقتاً';
@@ -224,68 +226,106 @@
         trackBtn.addEventListener('click', async () => {
             const id = trackCampaignId.value.trim();
             if (!id) return alert('أدخل معرف الحملة');
+            
+            if (autoRefreshTimer) {
+                clearTimeout(autoRefreshTimer);
+                autoRefreshTimer = null;
+            }
+            
             const res = await fetch(`/api/campaigns/${id}`);
             const data = await res.json();
             if (!res.ok) return alert(data.error || 'خطأ');
             
-            trackPanel.style.display = 'block';
-            trackPanel.innerHTML = `
-                <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
-                <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
-                ${data.countdown ? `<div class="countdown-timer">⏳ التالي خلال: ${data.countdown.minutes}:${data.countdown.seconds.toString().padStart(2,'0')}</div>` : ''}
-                <div style="background:#1e4a5f; border-radius:20px; padding:15px; margin:15px 0; color:#fff;">
-                    <i class="fas fa-clock"></i> 
-                    ${data.use_time_window ? `النافذة الزمنية: من ${data.window_start} إلى ${data.window_end}` : 'لا توجد نافذة زمنية (الإرسال مفتوح 24 ساعة)'}
-                    <button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>
-                </div>
-                <div id="editTimeWindowForm" style="display:none; background:#0a2e3c; border-radius:20px; padding:15px; margin:15px 0;">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="editUseTimeWindow" ${data.use_time_window ? 'checked' : ''}>
-                        <label for="editUseTimeWindow" style="display:inline;">تفعيل النافذة الزمنية</label>
+            function renderPanel() {
+                trackPanel.style.display = 'block';
+                trackPanel.innerHTML = `
+                    <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
+                    <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
+                    ${data.countdown ? `<div class="countdown-timer">⏳ التالي خلال: ${data.countdown.minutes}:${data.countdown.seconds.toString().padStart(2,'0')}</div>` : ''}
+                    <div style="background:#1e4a5f; border-radius:20px; padding:15px; margin:15px 0; color:#fff;">
+                        <i class="fas fa-clock"></i> 
+                        ${data.use_time_window ? `النافذة الزمنية: من ${data.window_start} إلى ${data.window_end}` : 'لا توجد نافذة زمنية (الإرسال مفتوح 24 ساعة)'}
+                        <button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>
                     </div>
-                    <div id="editTimeFields" style="${data.use_time_window ? '' : 'display:none;'}">
-                        <label>من الساعة</label>
-                        <input type="time" id="editWindowStart" value="${data.window_start || '08:00'}">
-                        <label>إلى الساعة</label>
-                        <input type="time" id="editWindowEnd" value="${data.window_end || '23:00'}">
+                    <div id="editTimeWindowForm" style="display:none; background:#0a2e3c; border-radius:20px; padding:15px; margin:15px 0;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="editUseTimeWindow" ${data.use_time_window ? 'checked' : ''}>
+                            <label for="editUseTimeWindow" style="display:inline;">تفعيل النافذة الزمنية</label>
+                        </div>
+                        <div id="editTimeFields" style="${data.use_time_window ? '' : 'display:none;'}">
+                            <label>من الساعة</label>
+                            <input type="time" id="editWindowStart" value="${data.window_start || '08:00'}">
+                            <label>إلى الساعة</label>
+                            <input type="time" id="editWindowEnd" value="${data.window_end || '23:00'}">
+                        </div>
+                        <div style="margin-top:15px;">
+                            <button id="saveTimeWindowBtn" style="background:#25d366; border:none; padding:10px 20px; border-radius:30px; color:#000; font-weight:bold;">حفظ التغييرات</button>
+                            <button id="cancelEditBtn" style="background:#475569; border:none; padding:10px 20px; border-radius:30px; margin-right:10px;">إلغاء</button>
+                        </div>
                     </div>
-                    <div style="margin-top:15px;">
-                        <button id="saveTimeWindowBtn" style="background:#25d366; border:none; padding:10px 20px; border-radius:30px; color:#000; font-weight:bold;">حفظ التغييرات</button>
-                        <button id="cancelEditBtn" style="background:#475569; border:none; padding:10px 20px; border-radius:30px; margin-right:10px;">إلغاء</button>
-                    </div>
-                </div>
-                <div>✅ ناجح: ${data.sent_count} ❌ فشل: ${data.failed_count}</div>
-            `;
+                    <div>✅ ناجح: ${data.sent_count} ❌ فشل: ${data.failed_count}</div>
+                `;
 
-            document.getElementById('editTimeWindowBtn').addEventListener('click', () => {
-                document.getElementById('editTimeWindowForm').style.display = 'block';
-                document.getElementById('editTimeWindowBtn').style.display = 'none';
-            });
-            document.getElementById('cancelEditBtn').addEventListener('click', () => {
-                document.getElementById('editTimeWindowForm').style.display = 'none';
-                document.getElementById('editTimeWindowBtn').style.display = 'inline-block';
-            });
-            document.getElementById('editUseTimeWindow').addEventListener('change', (e) => {
-                document.getElementById('editTimeFields').style.display = e.target.checked ? 'block' : 'none';
-            });
-            document.getElementById('saveTimeWindowBtn').addEventListener('click', async () => {
-                const use = document.getElementById('editUseTimeWindow').checked;
-                const start = document.getElementById('editWindowStart').value;
-                const end = document.getElementById('editWindowEnd').value;
-                try {
-                    const r = await fetch(`/api/campaigns/${id}/timewindow`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ useTimeWindow: use, windowStart: start, windowEnd: end })
-                    });
-                    const d = await r.json();
-                    if (d.success) { alert('تم التحديث'); trackBtn.click(); }
-                    else alert(d.error);
-                } catch(e) { alert('خطأ'); }
-            });
+                const editBtn = document.getElementById('editTimeWindowBtn');
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                const editForm = document.getElementById('editTimeWindowForm');
+                const editUseCheck = document.getElementById('editUseTimeWindow');
+                const editFields = document.getElementById('editTimeFields');
+                const saveBtn = document.getElementById('saveTimeWindowBtn');
 
-            if (data.status === 'processing' || data.status === 'waiting_window') {
-                setTimeout(() => trackBtn.click(), 5000);
+                editBtn.addEventListener('click', () => {
+                    editForm.style.display = 'block';
+                    editBtn.style.display = 'none';
+                    isEditingWindow = true;
+                    if (autoRefreshTimer) {
+                        clearTimeout(autoRefreshTimer);
+                        autoRefreshTimer = null;
+                    }
+                });
+
+                const closeEditForm = () => {
+                    editForm.style.display = 'none';
+                    editBtn.style.display = 'inline-block';
+                    isEditingWindow = false;
+                    if (data.status === 'processing' || data.status === 'waiting_window') {
+                        autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
+                    }
+                };
+
+                cancelBtn.addEventListener('click', closeEditForm);
+
+                editUseCheck.addEventListener('change', (e) => {
+                    editFields.style.display = e.target.checked ? 'block' : 'none';
+                });
+
+                saveBtn.addEventListener('click', async () => {
+                    const use = editUseCheck.checked;
+                    const start = document.getElementById('editWindowStart').value;
+                    const end = document.getElementById('editWindowEnd').value;
+                    try {
+                        const r = await fetch(`/api/campaigns/${id}/timewindow`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ useTimeWindow: use, windowStart: start, windowEnd: end })
+                        });
+                        const d = await r.json();
+                        if (d.success) {
+                            alert('تم تحديث النافذة الزمنية');
+                            closeEditForm();
+                            trackBtn.click();
+                        } else {
+                            alert(d.error);
+                        }
+                    } catch(e) {
+                        alert('خطأ في الاتصال');
+                    }
+                });
+            }
+
+            renderPanel();
+
+            if ((data.status === 'processing' || data.status === 'waiting_window') && !isEditingWindow) {
+                autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
             }
         });
     })();
