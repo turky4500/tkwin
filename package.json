@@ -1,7 +1,7 @@
 {
   "name": "whatsapp-sender-backend",
-  "version": "1.2.0",
-  "description": "Multi-user WhatsApp bulk sender with campaign tracking and WhatsApp report",
+  "version": "2.0.0",
+  "description": "Multi-user WhatsApp bulk sender with persistent PostgreSQL database",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -9,8 +9,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.4.0",
-    "sqlite3": "^5.1.6",
-    "sqlite": "^5.1.1",
+    "pg": "^8.11.3",
     "uuid": "^9.0.0"
   }
 }
