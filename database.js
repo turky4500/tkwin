@@ -1,16 +1,23 @@
 const { Pool } = require('pg');
 
-// استخدام متغير البيئة DATABASE_URL
+// إعدادات الاتصال - تدعم SSL بشكل صحيح لـ Supabase
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false // ضروري لـ Supabase
-  }
+  ssl: process.env.DATABASE_URL.includes('supabase') ? { rejectUnauthorized: false } : false,
+  max: 5, // أقصى عدد للاتصالات المتزامنة
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
 async function initializeDatabase() {
   const client = await pool.connect();
   try {
+    console.log('🔄 جاري الاتصال بقاعدة البيانات...');
+    
+    // اختبار الاتصال أولاً
+    await client.query('SELECT NOW()');
+    console.log('✅ تم الاتصال بقاعدة البيانات بنجاح.');
+
     // جدول الحملات الرئيسية
     await client.query(`
       CREATE TABLE IF NOT EXISTS campaigns (
@@ -31,6 +38,7 @@ async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    console.log('✅ جدول campaigns جاهز.');
 
     // جدول الأرقام المفردة
     await client.query(`
@@ -44,18 +52,23 @@ async function initializeDatabase() {
         retry_count INTEGER DEFAULT 0
       )
     `);
+    console.log('✅ جدول campaign_numbers جاهز.');
 
-    console.log('✅ تم الاتصال بقاعدة بيانات Supabase (PostgreSQL).');
   } catch (error) {
-    console.error('❌ خطأ في تهيئة قاعدة البيانات:', error);
+    console.error('❌ خطأ فادح في تهيئة قاعدة البيانات:', error.message);
     throw error;
   } finally {
     client.release();
   }
 }
 
+// دالة للحصول على عميل (للمعاملات)
+async function getClient() {
+  return await pool.connect();
+}
+
 function getDb() {
   return pool;
 }
 
-module.exports = { initializeDatabase, getDb };
+module.exports = { initializeDatabase, getDb, getClient };
