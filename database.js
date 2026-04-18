@@ -1,13 +1,8 @@
 const { Pool } = require('pg');
 
-// تعديل رابط الاتصال لإجبار IPv4
-const connectionString = process.env.DATABASE_URL + '?family=4';
-
 const pool = new Pool({
-  connectionString: connectionString,
-  ssl: {
-    rejectUnauthorized: false
-  },
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 15000,
@@ -53,7 +48,6 @@ async function initializeDatabase() {
       )
     `);
     console.log('✅ جدول campaign_numbers جاهز.');
-
   } catch (error) {
     console.error('❌ خطأ في تهيئة قاعدة البيانات:', error.message);
     throw error;
