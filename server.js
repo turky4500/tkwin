@@ -68,7 +68,11 @@ async function sendWhatsAppReport(to, body, token) {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 30000
     });
     console.log(`📨 تقرير إلى ${to}`);
-  } catch(e) { console.error(`❌ فشل التقرير: ${e.message}`); }
+    return true;
+  } catch(e) { 
+    console.error(`❌ فشل التقرير: ${e.message}`);
+    return false;
+  }
 }
 
 async function sendSingleMessage(to, message, token) {
@@ -138,7 +142,10 @@ async function startBackgroundSending(campaignId) {
         }
       }
 
-      if (!(i === numbers.length-1 && !keepRunning)) {
+      // تحديد ما إذا كان هذا هو آخر رقم في آخر جولة
+      const isLastNumber = (round > 1 && i === numbers.length - 1 && keepRunning === false);
+      
+      if (!isLastNumber) {
         const delay = Math.floor(Math.random() * (13*60*1000 - 3*60*1000 + 1)) + 3*60*1000;
         console.log(`⏳ انتظار ${Math.floor(delay/60000)} دقيقة...`);
         if (!await waitWithControl(campaignId, delay)) return;
@@ -148,23 +155,27 @@ async function startBackgroundSending(campaignId) {
     else { const rem = await db.query(`SELECT COUNT(*) FROM campaign_numbers WHERE campaign_id=$1 AND status='pending_retry' AND retry_count<$2`, [campaignId, MAX_RETRIES]); keepRunning = parseInt(rem.rows[0].count) > 0; }
   }
 
+  // إنهاء الحملة
   const final = await db.query(`SELECT sent_count, failed_count, total_numbers, phone_number, user_token FROM campaigns WHERE campaign_id=$1`, [campaignId]);
   if (final.rows.length) {
     const f = final.rows[0];
     let finalStatus = f.failed_count === f.total_numbers ? 'failed' : 'completed';
     await db.query(`UPDATE campaigns SET status=$1, updated_at=CURRENT_TIMESTAMP WHERE campaign_id=$2`, [finalStatus, campaignId]);
     console.log(`🏁 حملة ${campaignId} انتهت.`);
-    if (f.phone_number) await sendWhatsAppReport(f.phone_number, `📊 تقرير حملة ${campaignId}\n✅ ناجح: ${f.sent_count}\n❌ فشل: ${f.failed_count}`, f.user_token);
+    if (f.phone_number) {
+      const reportSent = await sendWhatsAppReport(f.phone_number, `📊 تقرير حملة ${campaignId}\n✅ ناجح: ${f.sent_count}\n❌ فشل: ${f.failed_count}`, f.user_token);
+      console.log(reportSent ? '✅ تم إرسال التقرير' : '❌ فشل إرسال التقرير');
+    } else {
+      console.log('ℹ️ لا يوجد رقم تقرير');
+    }
   }
 }
 
-// ========== استئناف الحملات العالقة عند بدء التشغيل ==========
+// ========== استئناف الحملات العالقة ==========
 async function resumeStalledCampaigns() {
   const db = getDb();
   try {
-    const stalled = await db.query(
-      `SELECT campaign_id FROM campaigns WHERE status IN ('processing', 'waiting_window') AND control_status = 'active'`
-    );
+    const stalled = await db.query(`SELECT campaign_id FROM campaigns WHERE status IN ('processing', 'waiting_window') AND control_status = 'active'`);
     console.log(`🔄 وجدت ${stalled.rows.length} حملة عالقة، جاري استئنافها...`);
     for (const row of stalled.rows) {
       startBackgroundSending(row.campaign_id).catch(e => console.error(`خطأ في استئناف ${row.campaign_id}:`, e));
@@ -208,7 +219,7 @@ app.get('/api/campaigns/:campaignId', async (req, res) => {
     const nums = await db.query(`SELECT phone_number, status, error_message, sent_at, retry_count FROM campaign_numbers WHERE campaign_id=$1 ORDER BY id`, [req.params.campaignId]);
     let countdown = null;
     const timer = countdownTimers.get(req.params.campaignId);
-    if (timer) { const rem = timer.endTime - Date.now(); if (rem>0) countdown = { minutes: Math.floor(rem/60000), seconds: Math.floor((rem%60000)/1000) }; }
+    if (timer) { const rem = timer.endTime - Date.now(); if (rem>0) countdown = { minutes: Math.floor(rem/60000), seconds: Math.floor((rem%60000)/1000), totalSeconds: Math.floor(rem/1000) }; }
     res.json({ ...camp.rows[0], numbers: nums.rows, countdown });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -238,7 +249,6 @@ app.put('/api/campaigns/:campaignId/timewindow', async (req, res) => {
 });
 app.get('/ping', (req, res) => res.send('OK'));
 
-// بدء الخادم واستئناف الحملات العالقة
 app.listen(port, async () => {
   console.log(`🚀 الخادم يعمل على ${port}`);
   await resumeStalledCampaigns();
