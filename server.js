@@ -81,6 +81,7 @@ async function sendSingleMessage(to, message, token) {
 async function startBackgroundSending(campaignId) {
   const db = getDb();
   await db.query(`UPDATE campaigns SET status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE campaign_id = $1`, [campaignId]);
+
   const campaignRes = await db.query(`SELECT user_token, message, phone_number, control_status, use_time_window, window_start, window_end FROM campaigns WHERE campaign_id = $1`, [campaignId]);
   if (campaignRes.rows.length === 0) return;
   const campaign = campaignRes.rows[0];
@@ -157,6 +158,22 @@ async function startBackgroundSending(campaignId) {
   }
 }
 
+// ========== استئناف الحملات العالقة عند بدء التشغيل ==========
+async function resumeStalledCampaigns() {
+  const db = getDb();
+  try {
+    const stalled = await db.query(
+      `SELECT campaign_id FROM campaigns WHERE status IN ('processing', 'waiting_window') AND control_status = 'active'`
+    );
+    console.log(`🔄 وجدت ${stalled.rows.length} حملة عالقة، جاري استئنافها...`);
+    for (const row of stalled.rows) {
+      startBackgroundSending(row.campaign_id).catch(e => console.error(`خطأ في استئناف ${row.campaign_id}:`, e));
+    }
+  } catch (e) {
+    console.error('خطأ في استئناف الحملات:', e);
+  }
+}
+
 // ========== API ==========
 app.post('/api/campaigns', async (req, res) => {
   const { numbers, message, token, phone, useTimeWindow, windowStart, windowEnd } = req.body;
@@ -221,4 +238,8 @@ app.put('/api/campaigns/:campaignId/timewindow', async (req, res) => {
 });
 app.get('/ping', (req, res) => res.send('OK'));
 
-app.listen(port, () => console.log(`🚀 الخادم يعمل على ${port}`));
+// بدء الخادم واستئناف الحملات العالقة
+app.listen(port, async () => {
+  console.log(`🚀 الخادم يعمل على ${port}`);
+  await resumeStalledCampaigns();
+});
