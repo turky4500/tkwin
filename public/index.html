@@ -38,6 +38,9 @@
         .edit-time-btn { background:#facc15; border:none; padding:5px 15px; border-radius:20px; cursor:pointer; font-weight:bold; }
         .campaign-id-box { background:#0b3b4e; border-radius:20px; padding:15px; margin-bottom:20px; color:#fff; text-align:center; font-size:1.2rem; }
         .small-note { color:#b3e4ff; font-size:0.9rem; margin-top:5px; display:block; }
+        .control-buttons { display:flex; gap:10px; justify-content:center; margin:15px 0; }
+        .control-btn { background:#1e4a5f; border:1px solid #2dd4bf; color:#fff; padding:10px 20px; border-radius:40px; font-size:1rem; cursor:pointer; transition:0.2s; }
+        .control-btn:hover { background:#2dd4bf; color:#022c3a; }
     </style>
 </head>
 <body>
@@ -251,6 +254,20 @@
             return c.status;
         }
 
+        async function controlCampaign(campaignId, action) {
+            try {
+                const res = await fetch(`/api/campaigns/${campaignId}/${action}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    trackBtn.click(); // إعادة تحميل البيانات
+                } else {
+                    alert('فشل تنفيذ الإجراء');
+                }
+            } catch (e) {
+                alert('خطأ في الاتصال');
+            }
+        }
+
         trackBtn.addEventListener('click', async () => {
             const id = trackCampaignId.value.trim();
             if (!id) return alert('أدخل معرف الحملة');
@@ -271,6 +288,14 @@
                         <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
                         <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
                         ${data.countdown ? `<div class="countdown-timer">⏳ التالي خلال: ${data.countdown.minutes}:${data.countdown.seconds.toString().padStart(2,'0')}</div>` : ''}
+                        
+                        <!-- أزرار التحكم -->
+                        <div class="control-buttons">
+                            ${data.control_status === 'active' ? `<button class="control-btn pause-btn" data-action="pause"><i class="fas fa-pause"></i> إيقاف مؤقت</button>` : ''}
+                            ${data.control_status === 'paused' ? `<button class="control-btn resume-btn" data-action="resume"><i class="fas fa-play"></i> استئناف</button>` : ''}
+                            <button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>
+                        </div>
+
                         <div style="background:#1e4a5f; border-radius:20px; padding:15px; margin:15px 0; color:#fff;">
                             <i class="fas fa-clock"></i> 
                             ${data.use_time_window ? `النافذة الزمنية: من ${data.window_start} إلى ${data.window_end}` : 'لا توجد نافذة زمنية (الإرسال مفتوح 24 ساعة)'}
@@ -294,6 +319,15 @@
                         </div>
                         <div>✅ ناجح: ${data.sent_count} ❌ فشل: ${data.failed_count}</div>
                     `;
+
+                    // ربط أحداث أزرار التحكم
+                    document.querySelector('.pause-btn')?.addEventListener('click', () => controlCampaign(id, 'pause'));
+                    document.querySelector('.resume-btn')?.addEventListener('click', () => controlCampaign(id, 'resume'));
+                    document.querySelector('.cancel-btn')?.addEventListener('click', () => {
+                        if (confirm('هل أنت متأكد من إلغاء الحملة؟ لن يتم إرسال باقي الرسائل.')) {
+                            controlCampaign(id, 'cancel');
+                        }
+                    });
 
                     const editBtn = document.getElementById('editTimeWindowBtn');
                     const cancelBtn = document.getElementById('cancelEditBtn');
