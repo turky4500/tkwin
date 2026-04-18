@@ -1,10 +1,14 @@
 const { Pool } = require('pg');
 
-// إعدادات الاتصال - تدعم SSL بشكل صحيح لـ Supabase
+// إعدادات الاتصال - تدعم IPv4 و SSL بشكل صحيح لـ Supabase
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes('supabase') ? { rejectUnauthorized: false } : false,
-  max: 5, // أقصى عدد للاتصالات المتزامنة
+  ssl: {
+    rejectUnauthorized: false // ضروري لـ Supabase
+  },
+  // إجبار الاتصال على IPv4 لحل مشكلة ENETUNREACH
+  family: 4,
+  max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
