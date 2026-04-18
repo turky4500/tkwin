@@ -41,6 +41,7 @@
         .control-buttons { display:flex; gap:10px; justify-content:center; margin:15px 0; }
         .control-btn { background:#1e4a5f; border:1px solid #2dd4bf; color:#fff; padding:10px 20px; border-radius:40px; font-size:1rem; cursor:pointer; transition:0.2s; }
         .control-btn:hover { background:#2dd4bf; color:#022c3a; }
+        .completion-message { background:#14532d; border-radius:20px; padding:15px; margin:15px 0; color:#fff; text-align:center; font-size:1.2rem; border:1px solid #86efac; }
     </style>
 </head>
 <body>
@@ -54,6 +55,7 @@
 
         <!-- تبويب حملة جديدة -->
         <div id="tab-new" class="tab-content active">
+            <!-- نفس المحتوى السابق بدون تغيير -->
             <div class="grid-2col">
                 <div class="input-area">
                     <label><i class="fas fa-list-ol"></i> الأرقام (الصقها بأي صيغة)</label>
@@ -80,7 +82,6 @@
                     </div>
                 </div>
             </div>
-            <!-- قسم الجدولة الزمنية -->
             <div class="input-area" style="margin-bottom:20px;">
                 <div class="checkbox-group">
                     <input type="checkbox" id="useTimeWindow">
@@ -244,6 +245,8 @@
         const trackPanel = document.getElementById('trackProgressPanel');
         let autoRefreshTimer = null;
         let isEditingWindow = false;
+        let localCountdownInterval = null;
+        let currentCampaignData = null;
 
         function getStatusText(c) {
             if (c.control_status === 'paused') return '⏸️ متوقفة مؤقتاً';
@@ -259,13 +262,41 @@
                 const res = await fetch(`/api/campaigns/${campaignId}/${action}`, { method: 'POST' });
                 const data = await res.json();
                 if (data.success) {
-                    trackBtn.click(); // إعادة تحميل البيانات
+                    trackBtn.click();
                 } else {
                     alert('فشل تنفيذ الإجراء');
                 }
             } catch (e) {
                 alert('خطأ في الاتصال');
             }
+        }
+
+        function stopLocalCountdown() {
+            if (localCountdownInterval) {
+                clearInterval(localCountdownInterval);
+                localCountdownInterval = null;
+            }
+        }
+
+        function startLocalCountdown(initialRemainingSeconds) {
+            stopLocalCountdown();
+            let remaining = initialRemainingSeconds;
+            const countdownEl = document.getElementById('localCountdown');
+            if (!countdownEl) return;
+
+            const updateDisplay = () => {
+                if (remaining <= 0) {
+                    countdownEl.textContent = '⏳ جارٍ الإرسال...';
+                    stopLocalCountdown();
+                    return;
+                }
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                countdownEl.textContent = `⏳ التالي خلال: ${mins}:${secs.toString().padStart(2,'0')}`;
+                remaining--;
+            };
+            updateDisplay();
+            localCountdownInterval = setInterval(updateDisplay, 1000);
         }
 
         trackBtn.addEventListener('click', async () => {
@@ -276,31 +307,40 @@
                 clearTimeout(autoRefreshTimer);
                 autoRefreshTimer = null;
             }
+            stopLocalCountdown();
             
             try {
                 const res = await fetch(`/api/campaigns/${id}`);
                 const data = await res.json();
                 if (!res.ok) return alert(data.error || 'خطأ');
+                currentCampaignData = data;
                 
                 function renderPanel() {
                     trackPanel.style.display = 'block';
                     trackPanel.innerHTML = `
                         <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
                         <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
-                        ${data.countdown ? `<div class="countdown-timer">⏳ التالي خلال: ${data.countdown.minutes}:${data.countdown.seconds.toString().padStart(2,'0')}</div>` : ''}
+                        <div id="localCountdown" class="countdown-timer">⏳ جارٍ الإرسال...</div>
                         
-                        <!-- أزرار التحكم -->
+                        ${data.status === 'completed' || data.status === 'failed' ? `
+                            <div class="completion-message">
+                                <i class="fas fa-check-circle"></i> تم انتهاء الحملة
+                                ${data.phone_number ? '<br>📨 تم إرسال تقرير واتساب إلى الرقم المدخل' : ''}
+                            </div>
+                        ` : ''}
+
                         <div class="control-buttons">
                             ${data.control_status === 'active' ? `<button class="control-btn pause-btn" data-action="pause"><i class="fas fa-pause"></i> إيقاف مؤقت</button>` : ''}
                             ${data.control_status === 'paused' ? `<button class="control-btn resume-btn" data-action="resume"><i class="fas fa-play"></i> استئناف</button>` : ''}
-                            <button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>
+                            ${data.status !== 'completed' && data.status !== 'failed' ? `<button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>` : ''}
                         </div>
 
                         <div style="background:#1e4a5f; border-radius:20px; padding:15px; margin:15px 0; color:#fff;">
                             <i class="fas fa-clock"></i> 
                             ${data.use_time_window ? `النافذة الزمنية: من ${data.window_start} إلى ${data.window_end}` : 'لا توجد نافذة زمنية (الإرسال مفتوح 24 ساعة)'}
-                            <button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>
+                            ${data.status !== 'completed' && data.status !== 'failed' ? `<button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>` : ''}
                         </div>
+                        ${data.status !== 'completed' && data.status !== 'failed' ? `
                         <div id="editTimeWindowForm" style="display:none; background:#0a2e3c; border-radius:20px; padding:15px; margin:15px 0;">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="editUseTimeWindow" ${data.use_time_window ? 'checked' : ''}>
@@ -317,10 +357,16 @@
                                 <button id="cancelEditBtn" style="background:#475569; border:none; padding:10px 20px; border-radius:30px; margin-right:10px;">إلغاء</button>
                             </div>
                         </div>
+                        ` : ''}
                         <div>✅ ناجح: ${data.sent_count} ❌ فشل: ${data.failed_count}</div>
                     `;
 
-                    // ربط أحداث أزرار التحكم
+                    // بدء العد التنازلي المحلي إذا كان هناك عداد
+                    if (data.countdown && data.status === 'processing') {
+                        startLocalCountdown(data.countdown.totalSeconds);
+                    }
+
+                    // ربط أزرار التحكم
                     document.querySelector('.pause-btn')?.addEventListener('click', () => controlCampaign(id, 'pause'));
                     document.querySelector('.resume-btn')?.addEventListener('click', () => controlCampaign(id, 'resume'));
                     document.querySelector('.cancel-btn')?.addEventListener('click', () => {
@@ -330,59 +376,62 @@
                     });
 
                     const editBtn = document.getElementById('editTimeWindowBtn');
-                    const cancelBtn = document.getElementById('cancelEditBtn');
-                    const editForm = document.getElementById('editTimeWindowForm');
-                    const editUseCheck = document.getElementById('editUseTimeWindow');
-                    const editFields = document.getElementById('editTimeFields');
-                    const saveBtn = document.getElementById('saveTimeWindowBtn');
+                    if (editBtn) {
+                        const cancelBtn = document.getElementById('cancelEditBtn');
+                        const editForm = document.getElementById('editTimeWindowForm');
+                        const editUseCheck = document.getElementById('editUseTimeWindow');
+                        const editFields = document.getElementById('editTimeFields');
+                        const saveBtn = document.getElementById('saveTimeWindowBtn');
 
-                    editBtn.addEventListener('click', () => {
-                        editForm.style.display = 'block';
-                        editBtn.style.display = 'none';
-                        isEditingWindow = true;
-                        if (autoRefreshTimer) {
-                            clearTimeout(autoRefreshTimer);
-                            autoRefreshTimer = null;
-                        }
-                    });
-
-                    const closeEditForm = () => {
-                        editForm.style.display = 'none';
-                        editBtn.style.display = 'inline-block';
-                        isEditingWindow = false;
-                        if (data.status === 'processing' || data.status === 'waiting_window') {
-                            autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
-                        }
-                    };
-
-                    cancelBtn.addEventListener('click', closeEditForm);
-
-                    editUseCheck.addEventListener('change', (e) => {
-                        editFields.style.display = e.target.checked ? 'block' : 'none';
-                    });
-
-                    saveBtn.addEventListener('click', async () => {
-                        const use = editUseCheck.checked;
-                        const start = document.getElementById('editWindowStart').value;
-                        const end = document.getElementById('editWindowEnd').value;
-                        try {
-                            const r = await fetch(`/api/campaigns/${id}/timewindow`, {
-                                method: 'PUT',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({ useTimeWindow: use, windowStart: start, windowEnd: end })
-                            });
-                            const d = await r.json();
-                            if (d.success) {
-                                alert('تم تحديث النافذة الزمنية');
-                                closeEditForm();
-                                trackBtn.click();
-                            } else {
-                                alert(d.error);
+                        editBtn.addEventListener('click', () => {
+                            editForm.style.display = 'block';
+                            editBtn.style.display = 'none';
+                            isEditingWindow = true;
+                            if (autoRefreshTimer) {
+                                clearTimeout(autoRefreshTimer);
+                                autoRefreshTimer = null;
                             }
-                        } catch(e) {
-                            alert('خطأ في الاتصال');
-                        }
-                    });
+                            stopLocalCountdown();
+                        });
+
+                        const closeEditForm = () => {
+                            editForm.style.display = 'none';
+                            editBtn.style.display = 'inline-block';
+                            isEditingWindow = false;
+                            if (data.status === 'processing' || data.status === 'waiting_window') {
+                                autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
+                            }
+                        };
+
+                        cancelBtn.addEventListener('click', closeEditForm);
+
+                        editUseCheck.addEventListener('change', (e) => {
+                            editFields.style.display = e.target.checked ? 'block' : 'none';
+                        });
+
+                        saveBtn.addEventListener('click', async () => {
+                            const use = editUseCheck.checked;
+                            const start = document.getElementById('editWindowStart').value;
+                            const end = document.getElementById('editWindowEnd').value;
+                            try {
+                                const r = await fetch(`/api/campaigns/${id}/timewindow`, {
+                                    method: 'PUT',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ useTimeWindow: use, windowStart: start, windowEnd: end })
+                                });
+                                const d = await r.json();
+                                if (d.success) {
+                                    alert('تم تحديث النافذة الزمنية');
+                                    closeEditForm();
+                                    trackBtn.click();
+                                } else {
+                                    alert(d.error);
+                                }
+                            } catch(e) {
+                                alert('خطأ في الاتصال');
+                            }
+                        });
+                    }
                 }
 
                 renderPanel();
