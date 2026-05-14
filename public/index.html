@@ -245,7 +245,6 @@
         let autoRefreshTimer = null;
         let isEditingWindow = false;
         let localCountdownInterval = null;
-        let currentCampaignData = null;
 
         function getStatusText(c) {
             if (c.control_status === 'paused') return '⏸️ متوقفة مؤقتاً';
@@ -312,34 +311,44 @@
                 const res = await fetch(`/api/campaigns/${id}`);
                 const data = await res.json();
                 if (!res.ok) return alert(data.error || 'خطأ');
-                currentCampaignData = data;
-                
+
                 function renderPanel() {
                     trackPanel.style.display = 'block';
+
+                    const isTerminal = (data.status === 'completed' || data.status === 'failed' || data.control_status === 'cancelled');
+                    
                     let completionHtml = '';
-                    if (data.status === 'completed' || data.status === 'failed') {
+                    if (isTerminal) {
                         completionHtml = `<div class="completion-message">
                             <i class="fas fa-check-circle"></i> تم انتهاء الحملة
                             ${data.phone_number ? '<br>📨 تم إرسال تقرير واتساب إلى الرقم المدخل' : ''}
                         </div>`;
                     }
 
-                    trackPanel.innerHTML = `
-                        <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
-                        <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
-                        <div id="localCountdown" class="countdown-timer">⏳ جارٍ الإرسال...</div>
-                        ${completionHtml}
+                    // العد التنازلي يظهر فقط إذا كانت الحملة نشطة وليست منتهية
+                    const countdownHtml = (!isTerminal) ? `<div id="localCountdown" class="countdown-timer">⏳ جارٍ الإرسال...</div>` : '';
+
+                    // أزرار التحكم: إخفاء زر الإيقاف المؤقت للحملات المنتهية أو الملغية
+                    const showPause = data.control_status === 'active' && !isTerminal;
+                    const showResume = data.control_status === 'paused';
+                    const showCancel = !isTerminal;
+
+                    const controlButtons = `
                         <div class="control-buttons">
-                            ${data.control_status === 'active' ? `<button class="control-btn pause-btn" data-action="pause"><i class="fas fa-pause"></i> إيقاف مؤقت</button>` : ''}
-                            ${data.control_status === 'paused' ? `<button class="control-btn resume-btn" data-action="resume"><i class="fas fa-play"></i> استئناف</button>` : ''}
-                            ${data.status !== 'completed' && data.status !== 'failed' ? `<button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>` : ''}
+                            ${showPause ? `<button class="control-btn pause-btn" data-action="pause"><i class="fas fa-pause"></i> إيقاف مؤقت</button>` : ''}
+                            ${showResume ? `<button class="control-btn resume-btn" data-action="resume"><i class="fas fa-play"></i> استئناف</button>` : ''}
+                            ${showCancel ? `<button class="control-btn cancel-btn" data-action="cancel" style="background:#7f1d1d;"><i class="fas fa-ban"></i> إلغاء الحملة</button>` : ''}
                         </div>
+                    `;
+
+                    // صندوق النافذة الزمنية وزر التعديل يظهران فقط إن لم تكن الحملة منتهية
+                    const timeWindowHtml = `
                         <div style="background:#1e4a5f; border-radius:20px; padding:15px; margin:15px 0; color:#fff;">
                             <i class="fas fa-clock"></i> 
                             ${data.use_time_window ? `النافذة الزمنية: من ${data.window_start} إلى ${data.window_end}` : 'لا توجد نافذة زمنية (الإرسال مفتوح 24 ساعة)'}
-                            ${data.status !== 'completed' && data.status !== 'failed' ? `<button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>` : ''}
+                            ${!isTerminal ? `<button id="editTimeWindowBtn" class="edit-time-btn" style="margin-right:10px;"><i class="fas fa-edit"></i> تعديل</button>` : ''}
                         </div>
-                        ${data.status !== 'completed' && data.status !== 'failed' ? `
+                        ${!isTerminal ? `
                         <div id="editTimeWindowForm" style="display:none; background:#0a2e3c; border-radius:20px; padding:15px; margin:15px 0;">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="editUseTimeWindow" ${data.use_time_window ? 'checked' : ''}>
@@ -357,15 +366,24 @@
                             </div>
                         </div>
                         ` : ''}
+                    `;
+
+                    trackPanel.innerHTML = `
+                        <div class="status-header"><span>${getStatusText(data)}</span><span>${data.sent_count}/${data.total_numbers}</span></div>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width:${(data.sent_count/data.total_numbers)*100}%"></div></div>
+                        ${countdownHtml}
+                        ${completionHtml}
+                        ${controlButtons}
+                        ${timeWindowHtml}
                         <div>✅ ناجح: ${data.sent_count} ❌ فشل: ${data.failed_count}</div>
                     `;
 
-                    // بدء العد التنازلي المحلي إن وجد
-                    if (data.countdown && data.status === 'processing') {
+                    // بدء العد التنازلي المحلي إن وجد ولم تكن الحملة منتهية
+                    if (data.countdown && data.status === 'processing' && !isTerminal) {
                         startLocalCountdown(data.countdown.totalSeconds);
                     }
 
-                    // ربط أزرار التحكم
+                    // ربط أزرار التحكم إن وجدت
                     document.querySelector('.pause-btn')?.addEventListener('click', () => controlCampaign(id, 'pause'));
                     document.querySelector('.resume-btn')?.addEventListener('click', () => controlCampaign(id, 'resume'));
                     document.querySelector('.cancel-btn')?.addEventListener('click', () => {
@@ -397,7 +415,7 @@
                             editForm.style.display = 'none';
                             editBtn.style.display = 'inline-block';
                             isEditingWindow = false;
-                            if (data.status === 'processing' || data.status === 'waiting_window') {
+                            if (!isTerminal) {
                                 autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
                             }
                         };
@@ -435,6 +453,7 @@
 
                 renderPanel();
 
+                // التحديث التلقائي فقط إذا كانت الحملة نشطة وغير منتهية
                 if ((data.status === 'processing' || data.status === 'waiting_window') && !isEditingWindow) {
                     autoRefreshTimer = setTimeout(() => trackBtn.click(), 5000);
                 }
