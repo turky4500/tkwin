@@ -82,6 +82,7 @@ async function sendSingleMessage(to, message, token) {
   return res.data;
 }
 
+// الدالة الرئيسية للإرسال
 async function startBackgroundSending(campaignId) {
   const db = getDb();
   await db.query(`UPDATE campaigns SET status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE campaign_id = $1`, [campaignId]);
@@ -89,7 +90,8 @@ async function startBackgroundSending(campaignId) {
   const campaignRes = await db.query(`SELECT user_token, message, phone_number, control_status, use_time_window, window_start, window_end FROM campaigns WHERE campaign_id = $1`, [campaignId]);
   if (campaignRes.rows.length === 0) return;
   const campaign = campaignRes.rows[0];
-  let round = 1, keepRunning = true;
+  let round = 1;
+  let keepRunning = true;
 
   while (keepRunning) {
     const ctrl = await db.query(`SELECT control_status FROM campaigns WHERE campaign_id = $1`, [campaignId]);
@@ -101,9 +103,13 @@ async function startBackgroundSending(campaignId) {
       await db.query(`SELECT id, phone_number, retry_count FROM campaign_numbers WHERE campaign_id = $1 AND status = 'pending_retry' AND retry_count < $2 ORDER BY id`, [campaignId, MAX_RETRIES]);
     
     const numbers = numbersRes.rows;
-    if (numbers.length === 0) { round === 1 ? round = 2 : keepRunning = false; continue; }
+    if (numbers.length === 0) {
+      if (round === 1) { round = 2; continue; }
+      else { keepRunning = false; break; }
+    }
 
-    for (let i=0; i<numbers.length; i++) {
+    for (let i = 0; i < numbers.length; i++) {
+      // تحقق من حالة التحكم
       const check = await db.query(`SELECT control_status FROM campaigns WHERE campaign_id = $1`, [campaignId]);
       if (check.rows[0]?.control_status === 'paused') { await db.query(`UPDATE campaigns SET current_index=$1, status='paused' WHERE campaign_id=$2`, [i, campaignId]); clearCountdown(campaignId); return; }
       if (check.rows[0]?.control_status === 'cancelled') { await db.query(`UPDATE campaigns SET status='cancelled' WHERE campaign_id=$1`, [campaignId]); clearCountdown(campaignId); return; }
@@ -112,6 +118,7 @@ async function startBackgroundSending(campaignId) {
       const attemptNumber = (currentRetries || 0) + 1;
       await db.query(`UPDATE campaigns SET current_index = $1 WHERE campaign_id = $2`, [i+1, campaignId]);
 
+      // النافذة الزمنية
       if (campaign.use_time_window) {
         while (!isWithinTimeWindow(campaign.window_start, campaign.window_end)) {
           await db.query(`UPDATE campaigns SET status = 'waiting_window' WHERE campaign_id = $1`, [campaignId]);
@@ -124,6 +131,7 @@ async function startBackgroundSending(campaignId) {
         }
       }
 
+      // إرسال الرسالة
       try {
         await sendSingleMessage(phone_number, campaign.message, campaign.user_token);
         await db.query(`UPDATE campaign_numbers SET status='sent', sent_at=CURRENT_TIMESTAMP, retry_count=$1 WHERE id=$2`, [attemptNumber, id]);
@@ -142,28 +150,51 @@ async function startBackgroundSending(campaignId) {
         }
       }
 
-      // تحديد ما إذا كان هذا هو آخر رقم في آخر جولة
-      const isLastNumber = (round > 1 && i === numbers.length - 1 && keepRunning === false);
-      
-      if (!isLastNumber) {
-        const delay = Math.floor(Math.random() * (13*60*1000 - 3*60*1000 + 1)) + 3*60*1000;
-        console.log(`⏳ انتظار ${Math.floor(delay/60000)} دقيقة...`);
-        if (!await waitWithControl(campaignId, delay)) return;
+      // هل تبقى أرقام لإرسالها بعد هذا؟
+      const remainingNumbers = await db.query(
+        `SELECT COUNT(*) as count FROM campaign_numbers 
+         WHERE campaign_id = $1 AND (status = 'pending' OR (status = 'pending_retry' AND retry_count < $2))`,
+        [campaignId, MAX_RETRIES]
+      );
+      const hasRemaining = parseInt(remainingNumbers.rows[0].count) > 0;
+
+      // إذا لم يتبق أرقام، ننهي الحملة دون تأخير
+      if (!hasRemaining) {
+        keepRunning = false;
+        break; // يخرج من حلقة for ويذهب إلى نهاية while
       }
+
+      // إذا كان هناك أرقام متبقية، نطبق التأخير العشوائي بين 3-13 دقيقة
+      const delay = Math.floor(Math.random() * (13*60*1000 - 3*60*1000 + 1)) + 3*60*1000;
+      console.log(`⏳ انتظار ${Math.floor(delay/60000)} دقيقة...`);
+      if (!await waitWithControl(campaignId, delay)) return;
     }
-    if (round === 1) round = 2;
-    else { const rem = await db.query(`SELECT COUNT(*) FROM campaign_numbers WHERE campaign_id=$1 AND status='pending_retry' AND retry_count<$2`, [campaignId, MAX_RETRIES]); keepRunning = parseInt(rem.rows[0].count) > 0; }
+
+    // بعد الانتهاء من الجولة، إن لم نخرج مبكرًا
+    if (!keepRunning) break;
+
+    if (round === 1) {
+      round = 2;
+    } else {
+      const stillPending = await db.query(
+        `SELECT COUNT(*) as count FROM campaign_numbers WHERE campaign_id=$1 AND status = 'pending_retry' AND retry_count < $2`,
+        [campaignId, MAX_RETRIES]
+      );
+      keepRunning = parseInt(stillPending.rows[0].count) > 0;
+    }
   }
 
-  // إنهاء الحملة
+  // إنهاء الحملة وإرسال التقرير فورًا
   const final = await db.query(`SELECT sent_count, failed_count, total_numbers, phone_number, user_token FROM campaigns WHERE campaign_id=$1`, [campaignId]);
   if (final.rows.length) {
     const f = final.rows[0];
     let finalStatus = f.failed_count === f.total_numbers ? 'failed' : 'completed';
     await db.query(`UPDATE campaigns SET status=$1, updated_at=CURRENT_TIMESTAMP WHERE campaign_id=$2`, [finalStatus, campaignId]);
     console.log(`🏁 حملة ${campaignId} انتهت.`);
+
     if (f.phone_number) {
-      const reportSent = await sendWhatsAppReport(f.phone_number, `📊 تقرير حملة ${campaignId}\n✅ ناجح: ${f.sent_count}\n❌ فشل: ${f.failed_count}`, f.user_token);
+      const reportMsg = `📊 تقرير حملة ${campaignId}\n✅ ناجح: ${f.sent_count}\n❌ فشل: ${f.failed_count}\n📋 الإجمالي: ${f.total_numbers}`;
+      const reportSent = await sendWhatsAppReport(f.phone_number, reportMsg, f.user_token);
       console.log(reportSent ? '✅ تم إرسال التقرير' : '❌ فشل إرسال التقرير');
     } else {
       console.log('ℹ️ لا يوجد رقم تقرير');
@@ -171,7 +202,7 @@ async function startBackgroundSending(campaignId) {
   }
 }
 
-// ========== استئناف الحملات العالقة ==========
+// استئناف الحملات العالقة عند بدء التشغيل
 async function resumeStalledCampaigns() {
   const db = getDb();
   try {
@@ -185,7 +216,7 @@ async function resumeStalledCampaigns() {
   }
 }
 
-// ========== API ==========
+// ========== نقاط النهاية ==========
 app.post('/api/campaigns', async (req, res) => {
   const { numbers, message, token, phone, useTimeWindow, windowStart, windowEnd } = req.body;
   if (!numbers?.length) return res.status(400).json({ error: 'الأرقام مطلوبة' });
