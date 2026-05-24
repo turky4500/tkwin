@@ -64,7 +64,7 @@ function clearCountdown(campaignId) { countdownTimers.delete(campaignId); }
 
 async function sendWhatsAppReport(to, body, token) {
   try {
-    await axios.post('https://whatsapp.tkwin.com.sa/api/v1/send', { to, message: body }, {
+    await axios.post('https://wats-enzn.onrender.com/api/v1/send', { to, message: body }, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 30000
     });
     console.log(`📨 تقرير إلى ${to}`);
@@ -76,7 +76,7 @@ async function sendWhatsAppReport(to, body, token) {
 }
 
 async function sendSingleMessage(to, message, token) {
-  const res = await axios.post('https://whatsapp.tkwin.com.sa/api/v1/send', { to, message }, {
+  const res = await axios.post('https://wats-enzn.onrender.com/api/v1/send', { to, message }, {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 30000
   });
   return res.data;
