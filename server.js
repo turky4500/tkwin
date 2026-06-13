@@ -9,6 +9,11 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
+// Serve index.html for root
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
 const countdownTimers = new Map();
 const MAX_RETRIES = 3;
 const KSA_OFFSET_HOURS = 3;
